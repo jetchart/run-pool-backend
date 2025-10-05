@@ -1,0 +1,19 @@
+import { RaceEntity } from '../entities/race.entity';
+
+export const mockRace: RaceEntity = {
+  id: 1,
+  name: 'Test Marathon',
+  description: 'A test marathon for testing purposes',
+  startDate: '2024-06-15',
+  endDate: '2024-06-15',
+  imageUrl: 'https://example.com/marathon.jpg',
+  city: 'Test City',
+  province: 'Test Province',
+  country: 'Test Country',
+  location: 'Test Location',
+  website: 'https://testmarathon.com',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  deletedAt: undefined,
+  distances: [],
+};
