@@ -1,4 +1,5 @@
 import { CreateRaceDto } from '../dtos/create-race.dto';
+import { RaceType } from '../enums/race-type.enum';
 
 export const mockCreateRaceDto: CreateRaceDto = {
   name: 'Test Marathon',
@@ -12,5 +13,6 @@ export const mockCreateRaceDto: CreateRaceDto = {
   location: 'Test Location',
   website: 'https://testmarathon.com',
   startLocation: 'Starting Point',
+  raceType: RaceType.STREET,
   raceDistances: [{ distanceId: 1 }],
 };

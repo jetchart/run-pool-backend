@@ -8,6 +8,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { RaceDistanceEntity } from './race-distance.entity';
+import { RaceType } from '../enums/race-type.enum';
 
 @Entity('race')
 export class RaceEntity {
@@ -43,6 +44,13 @@ export class RaceEntity {
 
   @Column({ name: 'website', length: 100 })
   website: string;
+
+  @Column({
+    type: 'enum',
+    enum: RaceType,
+    name: 'race_type',
+  })
+  raceType: RaceType;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;

@@ -1,4 +1,5 @@
 import { RaceEntity } from '../entities/race.entity';
+import { RaceType } from '../enums/race-type.enum';
 
 export const mockRace: RaceEntity = {
   id: 1,
@@ -12,6 +13,7 @@ export const mockRace: RaceEntity = {
   country: 'Test Country',
   location: 'Test Location',
   website: 'https://testmarathon.com',
+  raceType: RaceType.STREET,
   createdAt: new Date(),
   updatedAt: new Date(),
   deletedAt: undefined,

@@ -6,9 +6,11 @@ import {
   IsUrl,
   IsArray,
   ValidateNested,
+  IsEnum,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CreateRaceDistanceDto } from './create-race-distance.dto';
+import { RaceType } from '../enums/race-type.enum';
 
 export class CreateRaceDto {
   @IsString()
@@ -52,6 +54,9 @@ export class CreateRaceDto {
   @IsString()
   @IsNotEmpty()
   startLocation: string;
+
+  @IsEnum(RaceType)
+  raceType: RaceType;
 
   @IsArray()
   @ValidateNested({ each: true })
