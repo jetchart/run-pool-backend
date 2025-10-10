@@ -9,6 +9,7 @@ import { UserProfileRaceTypeEntity } from '../entities/user-profile-race-type.en
 import { UserProfileDistanceEntity } from '../entities/user-profile-distance.entity';
 import { UserEntity } from '../entities/user.entity';
 import { CreateCompleteUserProfileDto } from '../dtos/create-complete-user-profile.dto';
+import { UserProfileResponse } from '../dtos/user-profile-response.dto';
 import { Gender } from '../enums/gender.enum';
 import { RunningExperience } from '../enums/running-experience.enum';
 import { UsuallyTravelRace } from '../enums/usually-travel-race.enum';
@@ -149,10 +150,19 @@ describe('UserProfileService', () => {
 
       const mockCreatedProfile = {
         ...mockProfile,
-        cars: [{ id: 1, brand: 'Toyota', model: 'Corolla' }],
+        user: {
+          ...mockUser,
+          name: 'Test User',
+          givenName: 'Test',
+          familyName: 'User',
+          pictureUrl: 'http://example.com/pic.jpg',
+        },
+        cars: [{ id: 1, brand: 'Toyota', model: 'Corolla', createdAt: new Date(), updatedAt: new Date() }],
         preferredRaceTypes: [{ id: 1, raceType: RaceType.STREET }],
         preferredDistances: [{ id: 1, distance: Distance.TEN_K }],
-      } as UserProfileEntity;
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as unknown as UserProfileEntity;
 
       mockManager.findOne
         .mockResolvedValueOnce(mockUser) // User exists
@@ -177,7 +187,32 @@ describe('UserProfileService', () => {
 
       const result = await service.createCompleteProfile(mockDto);
 
-      expect(result).toEqual(mockCreatedProfile);
+      expect(result).toEqual({
+        id: mockCreatedProfile.id,
+        name: mockCreatedProfile.name,
+        surname: mockCreatedProfile.surname,
+        email: mockCreatedProfile.email,
+        birthYear: mockCreatedProfile.birthYear,
+        gender: mockCreatedProfile.gender,
+        runningExperience: mockCreatedProfile.runningExperience,
+        usuallyTravelRace: mockCreatedProfile.usuallyTravelRace,
+        imageName: mockCreatedProfile.imageName,
+        user: {
+          id: mockCreatedProfile.user.id,
+          name: mockCreatedProfile.user.name,
+          givenName: mockCreatedProfile.user.givenName,
+          familyName: mockCreatedProfile.user.familyName,
+          email: mockCreatedProfile.user.email,
+          pictureUrl: mockCreatedProfile.user.pictureUrl,
+          createdAt: mockCreatedProfile.user.createdAt,
+          updatedAt: mockCreatedProfile.user.updatedAt,
+        },
+        cars: mockCreatedProfile.cars,
+        preferredRaceTypes: mockCreatedProfile.preferredRaceTypes,
+        preferredDistances: mockCreatedProfile.preferredDistances,
+        createdAt: mockCreatedProfile.createdAt,
+        updatedAt: mockCreatedProfile.updatedAt,
+      });
       expect(mockManager.findOne).toHaveBeenCalledTimes(3);
       expect(mockManager.save).toHaveBeenCalledTimes(4);
     });
@@ -229,7 +264,16 @@ describe('UserProfileService', () => {
         runningExperience: RunningExperience.INTERMEDIATE,
         usuallyTravelRace: UsuallyTravelRace.GO_ALONE,
         imageName: 'profile.jpg',
-        user: { id: 1 },
+        user: { 
+          id: 1,
+          name: 'Test User',
+          givenName: 'Test',
+          familyName: 'User',
+          email: 'test@example.com',
+          pictureUrl: 'http://example.com/pic.jpg',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
         cars: [],
         preferredRaceTypes: [],
         preferredDistances: [],
@@ -242,7 +286,23 @@ describe('UserProfileService', () => {
 
       const result = await service.findCompleteProfile(1);
 
-      expect(result).toEqual(mockProfile);
+      expect(result).toEqual({
+        id: mockProfile.id,
+        name: mockProfile.name,
+        surname: mockProfile.surname,
+        email: mockProfile.email,
+        birthYear: mockProfile.birthYear,
+        gender: mockProfile.gender,
+        runningExperience: mockProfile.runningExperience,
+        usuallyTravelRace: mockProfile.usuallyTravelRace,
+        imageName: mockProfile.imageName,
+        user: mockProfile.user,
+        cars: mockProfile.cars,
+        preferredRaceTypes: mockProfile.preferredRaceTypes,
+        preferredDistances: mockProfile.preferredDistances,
+        createdAt: mockProfile.createdAt,
+        updatedAt: mockProfile.updatedAt,
+      });
       expect(mockRepository.findOne).toHaveBeenCalledWith({
         where: { id: 1 },
         relations: [
@@ -269,14 +329,50 @@ describe('UserProfileService', () => {
         id: 1,
         name: 'John',
         surname: 'Doe',
-        user: { id: 1 },
+        email: 'john.doe@example.com',
+        birthYear: 1990,
+        gender: Gender.MASCULINE,
+        runningExperience: RunningExperience.INTERMEDIATE,
+        usuallyTravelRace: UsuallyTravelRace.GO_ALONE,
+        imageName: 'profile.jpg',
+        user: { 
+          id: 1,
+          name: 'Test User',
+          givenName: 'Test',
+          familyName: 'User',
+          email: 'test@example.com',
+          pictureUrl: 'http://example.com/pic.jpg',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        cars: [],
+        preferredRaceTypes: [],
+        preferredDistances: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
       } as unknown as UserProfileEntity;
 
       mockRepository.findOne.mockResolvedValue(mockProfile);
 
       const result = await service.findProfileByUserId(1);
 
-      expect(result).toEqual(mockProfile);
+      expect(result).toEqual({
+        id: mockProfile.id,
+        name: mockProfile.name,
+        surname: mockProfile.surname,
+        email: mockProfile.email,
+        birthYear: mockProfile.birthYear,
+        gender: mockProfile.gender,
+        runningExperience: mockProfile.runningExperience,
+        usuallyTravelRace: mockProfile.usuallyTravelRace,
+        imageName: mockProfile.imageName,
+        user: mockProfile.user,
+        cars: mockProfile.cars,
+        preferredRaceTypes: mockProfile.preferredRaceTypes,
+        preferredDistances: mockProfile.preferredDistances,
+        createdAt: mockProfile.createdAt,
+        updatedAt: mockProfile.updatedAt,
+      });
       expect(mockRepository.findOne).toHaveBeenCalledWith({
         where: { user: { id: 1 } },
         relations: [

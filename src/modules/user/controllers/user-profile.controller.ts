@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { UserProfileService } from '../services/user-profile.service';
 import { CreateCompleteUserProfileDto } from '../dtos/create-complete-user-profile.dto';
-import { UserProfileEntity } from '../entities/user-profile.entity';
+import { UserProfileResponse } from '../dtos/user-profile-response.dto';
 
 @Controller('user-profiles')
 export class UserProfileController {
@@ -21,21 +21,21 @@ export class UserProfileController {
   @HttpCode(HttpStatus.CREATED)
   async createCompleteProfile(
     @Body() createCompleteUserProfileDto: CreateCompleteUserProfileDto,
-  ): Promise<UserProfileEntity> {
+  ): Promise<UserProfileResponse> {
     return this.userProfileService.createCompleteProfile(createCompleteUserProfileDto);
   }
 
   @Get(':id')
   async findCompleteProfile(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<UserProfileEntity> {
+  ): Promise<UserProfileResponse> {
     return this.userProfileService.findCompleteProfile(id);
   }
 
   @Get('user/:userId')
   async findProfileByUserId(
     @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<UserProfileEntity> {
+  ): Promise<UserProfileResponse> {
     return this.userProfileService.findProfileByUserId(userId);
   }
 

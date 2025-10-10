@@ -7,6 +7,7 @@ import { UserProfileRaceTypeEntity } from '../entities/user-profile-race-type.en
 import { UserProfileDistanceEntity } from '../entities/user-profile-distance.entity';
 import { UserEntity } from '../entities/user.entity';
 import { CreateCompleteUserProfileDto } from '../dtos/create-complete-user-profile.dto';
+import { UserProfileResponse } from '../dtos/user-profile-response.dto';
 
 @Injectable()
 export class UserProfileService {
@@ -24,7 +25,52 @@ export class UserProfileService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async createCompleteProfile(dto: CreateCompleteUserProfileDto): Promise<UserProfileEntity> {
+  private toResponse(entity: UserProfileEntity): UserProfileResponse {
+    return {
+      id: entity.id,
+      name: entity.name,
+      surname: entity.surname,
+      email: entity.email,
+      birthYear: entity.birthYear,
+      gender: entity.gender,
+      runningExperience: entity.runningExperience,
+      usuallyTravelRace: entity.usuallyTravelRace,
+      imageName: entity.imageName,
+      user: {
+        id: entity.user.id,
+        name: entity.user.name,
+        givenName: entity.user.givenName,
+        familyName: entity.user.familyName,
+        email: entity.user.email,
+        pictureUrl: entity.user.pictureUrl,
+        createdAt: entity.user.createdAt,
+        updatedAt: entity.user.updatedAt,
+      },
+      cars: entity.cars?.map(car => ({
+        id: car.id,
+        brand: car.brand,
+        model: car.model,
+        year: car.year,
+        color: car.color,
+        seats: car.seats,
+        licensePlate: car.licensePlate,
+        createdAt: car.createdAt,
+        updatedAt: car.updatedAt,
+      })) || [],
+      preferredRaceTypes: entity.preferredRaceTypes?.map(prt => ({
+        id: prt.id,
+        raceType: prt.raceType,
+      })) || [],
+      preferredDistances: entity.preferredDistances?.map(pd => ({
+        id: pd.id,
+        distance: pd.distance,
+      })) || [],
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+    };
+  }
+
+  async createCompleteProfile(dto: CreateCompleteUserProfileDto): Promise<UserProfileResponse> {
     // Usar transacción para asegurar consistencia
     return await this.dataSource.transaction(async (manager) => {
       // 1. Verificar que el usuario existe
@@ -108,7 +154,7 @@ export class UserProfileService {
       }
 
       // 7. Retornar el perfil completo con todas las relaciones
-      return await manager.findOne(UserProfileEntity, {
+      const completeProfile = await manager.findOne(UserProfileEntity, {
         where: { id: savedProfile.id },
         relations: [
           'user',
@@ -117,10 +163,12 @@ export class UserProfileService {
           'preferredDistances',
         ],
       }) as UserProfileEntity;
+
+      return this.toResponse(completeProfile);
     });
   }
 
-  async findCompleteProfile(userProfileId: number): Promise<UserProfileEntity> {
+  async findCompleteProfile(userProfileId: number): Promise<UserProfileResponse> {
     const profile = await this.userProfileRepository.findOne({
       where: { id: userProfileId },
       relations: [
@@ -135,10 +183,10 @@ export class UserProfileService {
       throw new NotFoundException(`User profile with id ${userProfileId} not found`);
     }
 
-    return profile;
+    return this.toResponse(profile);
   }
 
-  async findProfileByUserId(userId: number): Promise<UserProfileEntity> {
+  async findProfileByUserId(userId: number): Promise<UserProfileResponse> {
     const profile = await this.userProfileRepository.findOne({
       where: { user: { id: userId } },
       relations: [
@@ -153,7 +201,7 @@ export class UserProfileService {
       throw new NotFoundException(`User profile for user id ${userId} not found`);
     }
 
-    return profile;
+    return this.toResponse(profile);
   }
 
   async deleteProfile(userProfileId: number): Promise<void> {

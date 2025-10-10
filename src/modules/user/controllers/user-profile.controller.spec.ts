@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserProfileController } from './user-profile.controller';
 import { UserProfileService } from '../services/user-profile.service';
 import { CreateCompleteUserProfileDto } from '../dtos/create-complete-user-profile.dto';
-import { UserProfileEntity } from '../entities/user-profile.entity';
+import { UserProfileResponse } from '../dtos/user-profile-response.dto';
 import { Gender } from '../enums/gender.enum';
 import { RunningExperience } from '../enums/running-experience.enum';
 import { UsuallyTravelRace } from '../enums/usually-travel-race.enum';
@@ -111,7 +111,7 @@ describe('UserProfileController', () => {
           },
         },
       ],
-    } as unknown as UserProfileEntity;
+    } as unknown as UserProfileResponse;
 
     it('should create a complete profile successfully', async () => {
       mockUserProfileService.createCompleteProfile.mockResolvedValue(mockProfile);
@@ -170,7 +170,7 @@ describe('UserProfileController', () => {
       cars: [],
       preferredRaceTypes: [],
       preferredDistances: [],
-    } as unknown as UserProfileEntity;
+    } as unknown as UserProfileResponse;
 
     it('should return a complete profile', async () => {
       mockUserProfileService.findCompleteProfile.mockResolvedValue(mockProfile);
@@ -204,7 +204,7 @@ describe('UserProfileController', () => {
       cars: [],
       preferredRaceTypes: [],
       preferredDistances: [],
-    } as unknown as UserProfileEntity;
+    } as unknown as UserProfileResponse;
 
     it('should return a profile by user id', async () => {
       mockUserProfileService.findProfileByUserId.mockResolvedValue(mockProfile);
