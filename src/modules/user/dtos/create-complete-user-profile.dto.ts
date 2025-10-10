@@ -16,6 +16,7 @@ import { Gender } from '../enums/gender.enum';
 import { RunningExperience } from '../enums/running-experience.enum';
 import { UsuallyTravelRace } from '../enums/usually-travel-race.enum';
 import { RaceType } from '../../race/enums/race-type.enum';
+import { Distance } from '../enums/distance.enum';
 
 export class CreateUserProfileCarDto {
   @IsString()
@@ -55,9 +56,8 @@ export class CreateUserProfileRaceTypeDto {
 }
 
 export class CreateUserProfileDistanceDto {
-  @IsInt()
-  @Min(1)
-  distanceId: number;
+  @IsEnum(Distance)
+  distance: Distance;
 }
 
 export class CreateCompleteUserProfileDto {

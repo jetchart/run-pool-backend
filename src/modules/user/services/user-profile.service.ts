@@ -6,7 +6,6 @@ import { CarEntity } from '../entities/car.entity';
 import { UserProfileRaceTypeEntity } from '../entities/user-profile-race-type.entity';
 import { UserProfileDistanceEntity } from '../entities/user-profile-distance.entity';
 import { UserEntity } from '../entities/user.entity';
-import { DistanceEntity } from '../../race/entities/distance.entity';
 import { CreateCompleteUserProfileDto } from '../dtos/create-complete-user-profile.dto';
 
 @Injectable()
@@ -22,8 +21,6 @@ export class UserProfileService {
     private readonly userProfileDistanceRepository: Repository<UserProfileDistanceEntity>,
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
-    @InjectRepository(DistanceEntity)
-    private readonly distanceRepository: Repository<DistanceEntity>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -100,25 +97,12 @@ export class UserProfileService {
 
       // 6. Crear las preferencias de distancias si existen
       if (dto.preferredDistances && dto.preferredDistances.length > 0) {
-        // Verificar que las distancias existen
-        const distanceIds = dto.preferredDistances.map(d => d.distanceId);
-        const existingDistances = await manager.find(DistanceEntity, {
-          where: distanceIds.map(id => ({ id })),
-        });
-
-        if (existingDistances.length !== distanceIds.length) {
-          const foundIds = existingDistances.map(d => d.id);
-          const missingIds = distanceIds.filter(id => !foundIds.includes(id));
-          throw new NotFoundException(`Distances not found: ${missingIds.join(', ')}`);
-        }
-
-        const distancePreferences = dto.preferredDistances.map(distanceDto => {
-          const distance = existingDistances.find(d => d.id === distanceDto.distanceId);
-          return manager.create(UserProfileDistanceEntity, {
+        const distancePreferences = dto.preferredDistances.map(distanceDto =>
+          manager.create(UserProfileDistanceEntity, {
             userProfile: savedProfile,
-            distance: distance!,
-          });
-        });
+            distance: distanceDto.distance,
+          })
+        );
 
         await manager.save(UserProfileDistanceEntity, distancePreferences);
       }
@@ -131,7 +115,6 @@ export class UserProfileService {
           'cars',
           'preferredRaceTypes',
           'preferredDistances',
-          'preferredDistances.distance',
         ],
       }) as UserProfileEntity;
     });
@@ -145,7 +128,6 @@ export class UserProfileService {
         'cars',
         'preferredRaceTypes',
         'preferredDistances',
-        'preferredDistances.distance',
       ],
     });
 
@@ -164,7 +146,6 @@ export class UserProfileService {
         'cars',
         'preferredRaceTypes',
         'preferredDistances',
-        'preferredDistances.distance',
       ],
     });
 

@@ -3,9 +3,10 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
+  Column,
 } from 'typeorm';
 import { UserProfileEntity } from './user-profile.entity';
-import { DistanceEntity } from '../../race/entities/distance.entity';
+import { Distance } from '../enums/distance.enum';
 
 @Entity('user_profile_distance')
 export class UserProfileDistanceEntity {
@@ -18,9 +19,9 @@ export class UserProfileDistanceEntity {
   @JoinColumn({ name: 'user_profile_id' })
   userProfile: UserProfileEntity;
 
-  @ManyToOne(() => DistanceEntity, { 
-    onDelete: 'CASCADE' 
+  @Column({
+    type: 'enum',
+    enum: Distance,
   })
-  @JoinColumn({ name: 'distance_id' })
-  distance: DistanceEntity;
+  distance: Distance;
 }

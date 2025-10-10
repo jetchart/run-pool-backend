@@ -7,6 +7,7 @@ import { Gender } from '../enums/gender.enum';
 import { RunningExperience } from '../enums/running-experience.enum';
 import { UsuallyTravelRace } from '../enums/usually-travel-race.enum';
 import { RaceType } from '../../race/enums/race-type.enum';
+import { Distance } from '../enums/distance.enum';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 describe('UserProfileController', () => {
@@ -67,7 +68,7 @@ describe('UserProfileController', () => {
       ],
       preferredDistances: [
         {
-          distanceId: 1,
+          distance: Distance.TEN_K,
         },
       ],
     };

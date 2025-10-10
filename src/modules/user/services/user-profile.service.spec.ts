@@ -8,12 +8,12 @@ import { CarEntity } from '../entities/car.entity';
 import { UserProfileRaceTypeEntity } from '../entities/user-profile-race-type.entity';
 import { UserProfileDistanceEntity } from '../entities/user-profile-distance.entity';
 import { UserEntity } from '../entities/user.entity';
-import { DistanceEntity } from '../../race/entities/distance.entity';
 import { CreateCompleteUserProfileDto } from '../dtos/create-complete-user-profile.dto';
 import { Gender } from '../enums/gender.enum';
 import { RunningExperience } from '../enums/running-experience.enum';
 import { UsuallyTravelRace } from '../enums/usually-travel-race.enum';
 import { RaceType } from '../../race/enums/race-type.enum';
+import { Distance } from '../enums/distance.enum';
 
 describe('UserProfileService', () => {
   let service: UserProfileService;
@@ -22,7 +22,6 @@ describe('UserProfileService', () => {
   let userProfileRaceTypeRepository: Repository<UserProfileRaceTypeEntity>;
   let userProfileDistanceRepository: Repository<UserProfileDistanceEntity>;
   let userRepository: Repository<UserEntity>;
-  let distanceRepository: Repository<DistanceEntity>;
   let dataSource: DataSource;
 
   const mockRepository = {
@@ -62,10 +61,6 @@ describe('UserProfileService', () => {
           useValue: mockRepository,
         },
         {
-          provide: getRepositoryToken(DistanceEntity),
-          useValue: mockRepository,
-        },
-        {
           provide: DataSource,
           useValue: mockDataSource,
         },
@@ -84,9 +79,6 @@ describe('UserProfileService', () => {
       getRepositoryToken(UserProfileDistanceEntity),
     );
     userRepository = module.get<Repository<UserEntity>>(getRepositoryToken(UserEntity));
-    distanceRepository = module.get<Repository<DistanceEntity>>(
-      getRepositoryToken(DistanceEntity),
-    );
     dataSource = module.get<DataSource>(DataSource);
   });
 
@@ -129,7 +121,7 @@ describe('UserProfileService', () => {
       ],
       preferredDistances: [
         {
-          distanceId: 1,
+          distance: Distance.TEN_K,
         },
       ],
     };
@@ -155,22 +147,11 @@ describe('UserProfileService', () => {
         imageName: 'profile.jpg',
       } as UserProfileEntity;
 
-      const mockDistance = {
-        id: 1,
-        name: '10K',
-        kilometers: 10,
-        description: '10 kilometers',
-        shortDescription: '10K',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        races: [],
-      } as DistanceEntity;
-
       const mockCreatedProfile = {
         ...mockProfile,
         cars: [{ id: 1, brand: 'Toyota', model: 'Corolla' }],
         preferredRaceTypes: [{ id: 1, raceType: RaceType.STREET }],
-        preferredDistances: [{ id: 1, distance: mockDistance }],
+        preferredDistances: [{ id: 1, distance: Distance.TEN_K }],
       } as UserProfileEntity;
 
       mockManager.findOne
@@ -178,15 +159,13 @@ describe('UserProfileService', () => {
         .mockResolvedValueOnce(null) // No existing profile
         .mockResolvedValueOnce(mockCreatedProfile); // Final profile with relations
 
-      mockManager.find
-        .mockResolvedValueOnce([]) // No existing cars with same license plate
-        .mockResolvedValueOnce([mockDistance]); // Distance exists
+      mockManager.find.mockResolvedValueOnce([]); // No existing cars with same license plate
 
       mockManager.create
         .mockReturnValueOnce(mockProfile) // Profile creation
         .mockReturnValueOnce([{ licensePlate: 'ABC123' }]) // Car creation
         .mockReturnValueOnce([{ raceType: RaceType.STREET }]) // Race type creation
-        .mockReturnValueOnce([{ distance: mockDistance }]); // Distance creation
+        .mockReturnValueOnce([{ distance: Distance.TEN_K }]); // Distance creation
 
       mockManager.save
         .mockResolvedValueOnce(mockProfile) // Save profile
@@ -199,7 +178,6 @@ describe('UserProfileService', () => {
       const result = await service.createCompleteProfile(mockDto);
 
       expect(result).toEqual(mockCreatedProfile);
-      expect(mockDataSource.transaction).toHaveBeenCalledTimes(1);
       expect(mockManager.findOne).toHaveBeenCalledTimes(3);
       expect(mockManager.save).toHaveBeenCalledTimes(4);
     });
@@ -237,23 +215,6 @@ describe('UserProfileService', () => {
         new BadRequestException('License plates already exist: ABC123'),
       );
     });
-
-    it('should throw NotFoundException when distance does not exist', async () => {
-      const mockProfile = { id: 1 } as UserProfileEntity;
-      mockManager.findOne
-        .mockResolvedValueOnce(mockUser)
-        .mockResolvedValueOnce(null);
-      mockManager.find
-        .mockResolvedValueOnce([]) // No existing cars
-        .mockResolvedValueOnce([]); // Distance not found
-      mockManager.create.mockReturnValueOnce(mockProfile);
-      mockManager.save.mockResolvedValueOnce(mockProfile);
-      mockDataSource.transaction.mockImplementation(async (cb) => cb(mockManager));
-
-      await expect(service.createCompleteProfile(mockDto)).rejects.toThrow(
-        new NotFoundException('Distances not found: 1'),
-      );
-    });
   });
 
   describe('findCompleteProfile', () => {
@@ -289,7 +250,6 @@ describe('UserProfileService', () => {
           'cars',
           'preferredRaceTypes',
           'preferredDistances',
-          'preferredDistances.distance',
         ],
       });
     });
@@ -324,7 +284,6 @@ describe('UserProfileService', () => {
           'cars',
           'preferredRaceTypes',
           'preferredDistances',
-          'preferredDistances.distance',
         ],
       });
     });
