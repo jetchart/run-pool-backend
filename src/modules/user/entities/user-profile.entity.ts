@@ -6,12 +6,16 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   ManyToOne,
+  OneToMany,
   JoinColumn,
 } from 'typeorm';
 import { UserEntity } from '../../user/entities/user.entity';
 import { Gender } from '../enums/gender.enum';
 import { RunningExperience } from '../enums/running-experience.enum';
 import { UsuallyTravelRace } from '../enums/usually-travel-race.enum';
+import { UserProfileRaceTypeEntity } from './user-profile-race-type.entity';
+import { UserProfileDistanceEntity } from './user-profile-distance.entity';
+import { CarEntity } from './car.entity';
 
 @Entity('user_profile')
 export class UserProfileEntity {
@@ -68,6 +72,15 @@ export class UserProfileEntity {
     enum: UsuallyTravelRace,
   })
   usuallyTravelRace: UsuallyTravelRace;
+
+  @OneToMany(() => UserProfileRaceTypeEntity, (userProfileRaceType) => userProfileRaceType.userProfile)
+  preferredRaceTypes: UserProfileRaceTypeEntity[];
+
+  @OneToMany(() => UserProfileDistanceEntity, (userProfileDistance) => userProfileDistance.userProfile)
+  preferredDistances: UserProfileDistanceEntity[];
+
+  @OneToMany(() => CarEntity, (car) => car.userProfile)
+  cars: CarEntity[];
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
