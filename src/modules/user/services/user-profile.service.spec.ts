@@ -9,6 +9,7 @@ import { UserProfileRaceTypeEntity } from '../entities/user-profile-race-type.en
 import { UserProfileDistanceEntity } from '../entities/user-profile-distance.entity';
 import { UserEntity } from '../entities/user.entity';
 import { CreateCompleteUserProfileDto } from '../dtos/create-complete-user-profile.dto';
+import { UpdateUserProfileDto } from '../dtos/update-user-profile.dto';
 import { UserProfileResponse } from '../dtos/user-profile-response.dto';
 import { Gender } from '../enums/gender.enum';
 import { RunningExperience } from '../enums/running-experience.enum';
@@ -412,6 +413,103 @@ describe('UserProfileService', () => {
 
       await expect(service.deleteProfile(1)).rejects.toThrow(
         new NotFoundException('User profile with id 1 not found'),
+      );
+    });
+  });
+
+  describe('updateProfileByUserId', () => {
+    it('should update profile by user id successfully', async () => {
+      const mockProfile = {
+        id: 1,
+        name: 'John',
+        surname: 'Doe',
+        email: 'john.doe@example.com',
+        birthYear: 1990,
+        gender: Gender.MASCULINE,
+        runningExperience: RunningExperience.INTERMEDIATE,
+        usuallyTravelRace: UsuallyTravelRace.GO_ALONE,
+        imageName: 'profile.jpg',
+        user: { 
+          id: 1,
+          name: 'Test User',
+          givenName: 'Test',
+          familyName: 'User',
+          email: 'test@example.com',
+          pictureUrl: 'http://example.com/pic.jpg',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        cars: [],
+        preferredRaceTypes: [{ id: 1, raceType: RaceType.STREET }],
+        preferredDistances: [{ id: 1, distance: Distance.TEN_K }],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as unknown as UserProfileEntity;
+
+      const updateDto = {
+        name: 'Updated Name',
+        preferredRaceTypes: [
+          { raceType: RaceType.TRAIL }, // Nuevo tipo
+        ],
+        preferredDistances: [
+          { distance: Distance.TEN_K }, // Mantener existente
+          { distance: Distance.FIVE_K }, // Nuevo
+        ],
+      };
+
+      const mockManager = {
+        findOne: jest.fn()
+          .mockResolvedValueOnce(mockProfile) // Buscar perfil por userId
+          .mockResolvedValueOnce(mockProfile) // Buscar perfil por id en updateProfileInternal
+          .mockResolvedValueOnce({
+            ...mockProfile,
+            name: 'Updated Name',
+            preferredRaceTypes: [{ id: 2, raceType: RaceType.TRAIL }],
+            preferredDistances: [
+              { id: 1, distance: Distance.TEN_K },
+              { id: 3, distance: Distance.FIVE_K }
+            ],
+          }), // Retornar perfil actualizado
+        find: jest.fn()
+          .mockResolvedValueOnce([{ id: 1, raceType: RaceType.STREET }]) // Existing race types
+          .mockResolvedValueOnce([{ id: 1, distance: Distance.TEN_K }]), // Existing distances
+        save: jest.fn(),
+        delete: jest.fn(),
+        create: jest.fn()
+          .mockReturnValue({ raceType: RaceType.TRAIL })
+          .mockReturnValue({ distance: Distance.FIVE_K }),
+      };
+
+      mockDataSource.transaction.mockImplementation(async (cb) => cb(mockManager));
+
+      const result = await service.updateProfileByUserId(1, updateDto);
+
+      expect(result).toBeDefined();
+      expect(result.name).toBe('Updated Name');
+      expect(mockDataSource.transaction).toHaveBeenCalledTimes(1);
+      
+      // Verificar que se buscó el perfil por userId
+      expect(mockManager.findOne).toHaveBeenCalledWith(UserProfileEntity, {
+        where: { user: { id: 1 } },
+        relations: ['cars', 'preferredRaceTypes', 'preferredDistances'],
+      });
+
+      // Verificar que se eliminaron race types que ya no están
+      expect(mockManager.delete).toHaveBeenCalledWith(UserProfileRaceTypeEntity, [1]);
+      
+      // Verificar que se guardaron las entidades actualizadas
+      expect(mockManager.save).toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException when user profile not found', async () => {
+      const mockManager = {
+        findOne: jest.fn().mockResolvedValueOnce(null),
+      };
+
+      mockDataSource.transaction.mockImplementation(async (cb) => cb(mockManager));
+
+      await expect(service.updateProfileByUserId(999, { name: 'Test' })).rejects.toThrow(
+        new NotFoundException('User profile for user id 999 not found'),
       );
     });
   });

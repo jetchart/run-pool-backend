@@ -291,35 +291,69 @@ export class UserProfileService {
 
     // Actualizar tipos de carrera preferidos si están presentes
     if (dto.preferredRaceTypes) {
-      // Eliminar preferencias existentes
-      await manager.delete(UserProfileRaceTypeEntity, { userProfile: { id: userProfileId } });
+      const existingRaceTypes = await manager.find(UserProfileRaceTypeEntity, {
+        where: { userProfile: { id: userProfileId } },
+      });
 
-      // Crear nuevas preferencias
-      if (dto.preferredRaceTypes.length > 0) {
-        const newRaceTypes = dto.preferredRaceTypes.map(raceTypeDto =>
+      const newRaceTypes = dto.preferredRaceTypes.map(rt => rt.raceType);
+      const existingRaceTypeValues = existingRaceTypes.map(rt => rt.raceType);
+
+      // Eliminar tipos de carrera que ya no están en la nueva lista
+      const raceTypesToDelete = existingRaceTypes.filter(existing => 
+        !newRaceTypes.includes(existing.raceType)
+      );
+      if (raceTypesToDelete.length > 0) {
+        await manager.delete(UserProfileRaceTypeEntity, 
+          raceTypesToDelete.map(rt => rt.id)
+        );
+      }
+
+      // Agregar nuevos tipos de carrera que no existían antes
+      const raceTypesToAdd = newRaceTypes.filter(newRaceType => 
+        !existingRaceTypeValues.includes(newRaceType)
+      );
+      if (raceTypesToAdd.length > 0) {
+        const newRaceTypeEntities = raceTypesToAdd.map(raceType =>
           manager.create(UserProfileRaceTypeEntity, {
             userProfile: existingProfile,
-            raceType: raceTypeDto.raceType,
+            raceType: raceType,
           })
         );
-        await manager.save(UserProfileRaceTypeEntity, newRaceTypes);
+        await manager.save(UserProfileRaceTypeEntity, newRaceTypeEntities);
       }
     }
 
     // Actualizar distancias preferidas si están presentes
     if (dto.preferredDistances) {
-      // Eliminar preferencias existentes
-      await manager.delete(UserProfileDistanceEntity, { userProfile: { id: userProfileId } });
+      const existingDistances = await manager.find(UserProfileDistanceEntity, {
+        where: { userProfile: { id: userProfileId } },
+      });
 
-      // Crear nuevas preferencias
-      if (dto.preferredDistances.length > 0) {
-        const newDistances = dto.preferredDistances.map(distanceDto =>
+      const newDistances = dto.preferredDistances.map(d => d.distance);
+      const existingDistanceValues = existingDistances.map(d => d.distance);
+
+      // Eliminar distancias que ya no están en la nueva lista
+      const distancesToDelete = existingDistances.filter(existing => 
+        !newDistances.includes(existing.distance)
+      );
+      if (distancesToDelete.length > 0) {
+        await manager.delete(UserProfileDistanceEntity, 
+          distancesToDelete.map(d => d.id)
+        );
+      }
+
+      // Agregar nuevas distancias que no existían antes
+      const distancesToAdd = newDistances.filter(newDistance => 
+        !existingDistanceValues.includes(newDistance)
+      );
+      if (distancesToAdd.length > 0) {
+        const newDistanceEntities = distancesToAdd.map(distance =>
           manager.create(UserProfileDistanceEntity, {
             userProfile: existingProfile,
-            distance: distanceDto.distance,
+            distance: distance,
           })
         );
-        await manager.save(UserProfileDistanceEntity, newDistances);
+        await manager.save(UserProfileDistanceEntity, newDistanceEntities);
       }
     }
 
