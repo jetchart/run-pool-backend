@@ -5,6 +5,7 @@ export class UserCredentialDto extends UserDto {
 
   constructor(user: UserDto, accessToken: string) {
     super(
+      user.userId,
       user.email,
       user.name,
       user.givenName,

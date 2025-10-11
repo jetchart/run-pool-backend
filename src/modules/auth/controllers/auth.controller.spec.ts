@@ -8,6 +8,7 @@ import { UserDto } from '../../user/dtos/user.dto';
 
 const mockUserCredential = new UserCredentialDto(
   new UserDto(
+    1,
     'john@example.com',
     'John',
     'John',

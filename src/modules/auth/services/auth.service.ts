@@ -29,17 +29,24 @@ export class AuthService {
 
     const existingUser = await this.userService.findByEmail(payload.email!);
 
+    const persistedUser = existingUser
+      ? existingUser
+      : await this.userService.create({
+          email: payload.email!,
+          name: payload.name!,
+          givenName: payload.given_name!,
+          familyName: payload.family_name!,
+          pictureUrl: payload.picture!,
+        });
+
     const userDto = new UserDto(
+      persistedUser.id,
       payload.email!,
       payload.name!,
       payload.given_name!,
       payload.family_name!,
       payload.picture!,
     );
-
-    const persistedUser = existingUser
-      ? existingUser
-      : await this.userService.create(userDto);
 
     const access_token = this.jwtService.sign({ sub: persistedUser.email });
     return new UserCredentialDto(userDto, access_token);
