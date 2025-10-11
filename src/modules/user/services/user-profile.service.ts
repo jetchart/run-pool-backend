@@ -7,6 +7,7 @@ import { UserProfileRaceTypeEntity } from '../entities/user-profile-race-type.en
 import { UserProfileDistanceEntity } from '../entities/user-profile-distance.entity';
 import { UserEntity } from '../entities/user.entity';
 import { CreateCompleteUserProfileDto } from '../dtos/create-complete-user-profile.dto';
+import { UpdateUserProfileDto } from '../dtos/update-user-profile.dto';
 import { UserProfileResponse } from '../dtos/user-profile-response.dto';
 
 @Injectable()
@@ -202,6 +203,138 @@ export class UserProfileService {
     }
 
     return this.toResponse(profile);
+  }
+
+  async updateProfile(userProfileId: number, dto: UpdateUserProfileDto): Promise<UserProfileResponse> {
+    return await this.dataSource.transaction(async (manager) => {
+      return this.updateProfileInternal(manager, userProfileId, dto);
+    });
+  }
+
+  async updateProfileByUserId(userId: number, dto: UpdateUserProfileDto): Promise<UserProfileResponse> {
+    return await this.dataSource.transaction(async (manager) => {
+      // 1. Buscar el perfil por userId
+      const existingProfile = await manager.findOne(UserProfileEntity, {
+        where: { user: { id: userId } },
+        relations: ['cars', 'preferredRaceTypes', 'preferredDistances'],
+      });
+
+      if (!existingProfile) {
+        throw new NotFoundException(`User profile for user id ${userId} not found`);
+      }
+
+      // 2. Usar el método de actualización existente con el ID del perfil encontrado
+      return this.updateProfileInternal(manager, existingProfile.id, dto);
+    });
+  }
+
+  private async updateProfileInternal(manager: any, userProfileId: number, dto: UpdateUserProfileDto): Promise<UserProfileResponse> {
+    // Reutilizar la lógica de actualización existente
+    const existingProfile = await manager.findOne(UserProfileEntity, {
+      where: { id: userProfileId },
+      relations: ['cars', 'preferredRaceTypes', 'preferredDistances'],
+    });
+
+    if (!existingProfile) {
+      throw new NotFoundException(`User profile with id ${userProfileId} not found`);
+    }
+
+    // Actualizar campos básicos del perfil si están presentes
+    if (dto.name !== undefined) existingProfile.name = dto.name;
+    if (dto.surname !== undefined) existingProfile.surname = dto.surname;
+    if (dto.email !== undefined) existingProfile.email = dto.email;
+    if (dto.birthYear !== undefined) existingProfile.birthYear = dto.birthYear;
+    if (dto.gender !== undefined) existingProfile.gender = dto.gender;
+    if (dto.runningExperience !== undefined) existingProfile.runningExperience = dto.runningExperience;
+    if (dto.usuallyTravelRace !== undefined) existingProfile.usuallyTravelRace = dto.usuallyTravelRace;
+    if (dto.imageName !== undefined) existingProfile.imageName = dto.imageName;
+
+    await manager.save(UserProfileEntity, existingProfile);
+
+    // Actualizar coches si están presentes
+    if (dto.cars) {
+      // Eliminar coches existentes
+      await manager.delete(CarEntity, { userProfile: { id: userProfileId } });
+
+      // Verificar que las matrículas no estén duplicadas
+      const licensePlates = dto.cars
+        .filter(car => car.licensePlate)
+        .map(car => car.licensePlate!);
+      
+      if (licensePlates.length > 0) {
+        const existingCars = await manager.find(CarEntity, {
+          where: licensePlates.map(plate => ({ licensePlate: plate })),
+        });
+
+        if (existingCars.length > 0) {
+          const duplicatePlates = existingCars.map(car => car.licensePlate);
+          throw new BadRequestException(`License plates already exist: ${duplicatePlates.join(', ')}`);
+        }
+      }
+
+      // Crear nuevos coches
+      if (dto.cars.length > 0) {
+        const newCars = dto.cars.map(carDto =>
+          manager.create(CarEntity, {
+            brand: carDto.brand!,
+            model: carDto.model!,
+            year: carDto.year!,
+            color: carDto.color!,
+            seats: carDto.seats!,
+            licensePlate: carDto.licensePlate!,
+            userProfile: existingProfile,
+          })
+        );
+        await manager.save(CarEntity, newCars);
+      }
+    }
+
+    // Actualizar tipos de carrera preferidos si están presentes
+    if (dto.preferredRaceTypes) {
+      // Eliminar preferencias existentes
+      await manager.delete(UserProfileRaceTypeEntity, { userProfile: { id: userProfileId } });
+
+      // Crear nuevas preferencias
+      if (dto.preferredRaceTypes.length > 0) {
+        const newRaceTypes = dto.preferredRaceTypes.map(raceTypeDto =>
+          manager.create(UserProfileRaceTypeEntity, {
+            userProfile: existingProfile,
+            raceType: raceTypeDto.raceType,
+          })
+        );
+        await manager.save(UserProfileRaceTypeEntity, newRaceTypes);
+      }
+    }
+
+    // Actualizar distancias preferidas si están presentes
+    if (dto.preferredDistances) {
+      // Eliminar preferencias existentes
+      await manager.delete(UserProfileDistanceEntity, { userProfile: { id: userProfileId } });
+
+      // Crear nuevas preferencias
+      if (dto.preferredDistances.length > 0) {
+        const newDistances = dto.preferredDistances.map(distanceDto =>
+          manager.create(UserProfileDistanceEntity, {
+            userProfile: existingProfile,
+            distance: distanceDto.distance,
+          })
+        );
+        await manager.save(UserProfileDistanceEntity, newDistances);
+      }
+    }
+
+    // Retornar el perfil actualizado con todas las relaciones
+    const updatedProfile = await manager.findOne(UserProfileEntity, {
+      where: { id: userProfileId },
+      relations: [
+        'user',
+        'cars',
+        'preferredRaceTypes',
+        'preferredDistances',
+      ],
+    }) as UserProfileEntity;
+
+    return this.toResponse(updatedProfile);
   }
 
   async deleteProfile(userProfileId: number): Promise<void> {

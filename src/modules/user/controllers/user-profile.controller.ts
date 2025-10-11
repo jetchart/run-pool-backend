@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   Get,
+  Put,
   Delete,
   Body,
   Param,
@@ -11,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { UserProfileService } from '../services/user-profile.service';
 import { CreateCompleteUserProfileDto } from '../dtos/create-complete-user-profile.dto';
+import { UpdateUserProfileDto } from '../dtos/update-user-profile.dto';
 import { UserProfileResponse } from '../dtos/user-profile-response.dto';
 
 @Controller('user-profiles')
@@ -37,6 +39,22 @@ export class UserProfileController {
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<UserProfileResponse> {
     return this.userProfileService.findProfileByUserId(userId);
+  }
+
+  @Put(':id')
+  async updateProfile(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateUserProfileDto: UpdateUserProfileDto,
+  ): Promise<UserProfileResponse> {
+    return this.userProfileService.updateProfile(id, updateUserProfileDto);
+  }
+
+  @Put('user/:userId')
+  async updateProfileByUserId(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Body() updateUserProfileDto: UpdateUserProfileDto,
+  ): Promise<UserProfileResponse> {
+    return this.userProfileService.updateProfileByUserId(userId, updateUserProfileDto);
   }
 
   @Delete(':id')
