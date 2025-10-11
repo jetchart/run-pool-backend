@@ -6,7 +6,7 @@ import {
   Column,
 } from 'typeorm';
 import { UserProfileEntity } from './user-profile.entity';
-import { Distance } from '../enums/distance.enum';
+import { Distance } from '../../race/enums/distance.enum';
 
 @Entity('user_profile_distance')
 export class UserProfileDistanceEntity {

@@ -6,12 +6,11 @@ import { AppLoggerModule } from '../app-logger/app-logger.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RaceDistanceEntity } from './entities/race-distance.entity';
-import { DistanceEntity } from './entities/distance.entity';
 
 @Module({
     imports: [
         ConfigModule,
-        TypeOrmModule.forFeature([RaceEntity, RaceDistanceEntity, DistanceEntity]),
+        TypeOrmModule.forFeature([RaceEntity, RaceDistanceEntity]),
         AppLoggerModule,
       ],
       controllers: [RaceController],

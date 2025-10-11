@@ -1,12 +1,5 @@
-import { DistanceEntity } from '../entities/distance.entity';
+import { Distance, DISTANCE_INFO } from '../enums/distance.enum';
 
-export const mockDistance: DistanceEntity = {
-  id: 1,
-  description: '10 kilometers distance',
-  shortDescription: '10K',
-  kilometers: 10,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  deletedAt: undefined,
-  races: [],
-};
+export const mockDistance = Distance.TEN_K;
+
+export const mockDistanceInfo = DISTANCE_INFO[Distance.TEN_K];

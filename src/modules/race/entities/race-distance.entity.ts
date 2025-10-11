@@ -7,9 +7,10 @@ import {
   ManyToOne,
   JoinColumn,
   Unique,
+  Column,
 } from 'typeorm';
 import { RaceEntity } from './race.entity';
-import { DistanceEntity } from './distance.entity';
+import { Distance } from '../enums/distance.enum';
 
 @Entity('race_distance')
 @Unique(['race', 'distance'])
@@ -21,9 +22,8 @@ export class RaceDistanceEntity {
   @JoinColumn({ name: 'race_id' })
   race: RaceEntity;
 
-  @ManyToOne(() => DistanceEntity, (distance) => distance.races, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'distance_id' })
-  distance: DistanceEntity;
+  @Column({ name: 'distance', type: 'int' })
+  distance: Distance;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
