@@ -46,6 +46,8 @@ export class UserProfileResponse {
   gender: Gender;
   runningExperience: RunningExperience;
   usuallyTravelRace: UsuallyTravelRace;
+  phoneCountryCode: string;
+  phoneNumber: string;
   imageName?: string;
   user: UserResponse;
   cars: UserProfileCarResponse[];

@@ -105,6 +105,8 @@ describe('UserProfileService', () => {
       gender: Gender.MASCULINE,
       runningExperience: RunningExperience.INTERMEDIATE,
       usuallyTravelRace: UsuallyTravelRace.GO_ALONE,
+      phoneCountryCode: '+54',
+      phoneNumber: '1123456789',
       imageName: 'profile.jpg',
       cars: [
         {
@@ -146,6 +148,8 @@ describe('UserProfileService', () => {
         gender: Gender.MASCULINE,
         runningExperience: RunningExperience.INTERMEDIATE,
         usuallyTravelRace: UsuallyTravelRace.GO_ALONE,
+        phoneCountryCode: '+54',
+        phoneNumber: '1123456789',
         imageName: 'profile.jpg',
       } as UserProfileEntity;
 
@@ -197,6 +201,8 @@ describe('UserProfileService', () => {
         gender: mockCreatedProfile.gender,
         runningExperience: mockCreatedProfile.runningExperience,
         usuallyTravelRace: mockCreatedProfile.usuallyTravelRace,
+        phoneCountryCode: mockCreatedProfile.phoneCountryCode,
+        phoneNumber: mockCreatedProfile.phoneNumber,
         imageName: mockCreatedProfile.imageName,
         user: {
           id: mockCreatedProfile.user.id,
@@ -264,6 +270,8 @@ describe('UserProfileService', () => {
         gender: Gender.MASCULINE,
         runningExperience: RunningExperience.INTERMEDIATE,
         usuallyTravelRace: UsuallyTravelRace.GO_ALONE,
+        phoneCountryCode: '+54',
+        phoneNumber: '1123456789',
         imageName: 'profile.jpg',
         user: { 
           id: 1,
@@ -296,6 +304,8 @@ describe('UserProfileService', () => {
         gender: mockProfile.gender,
         runningExperience: mockProfile.runningExperience,
         usuallyTravelRace: mockProfile.usuallyTravelRace,
+        phoneCountryCode: mockProfile.phoneCountryCode,
+        phoneNumber: mockProfile.phoneNumber,
         imageName: mockProfile.imageName,
         user: mockProfile.user,
         cars: mockProfile.cars,
@@ -335,6 +345,8 @@ describe('UserProfileService', () => {
         gender: Gender.MASCULINE,
         runningExperience: RunningExperience.INTERMEDIATE,
         usuallyTravelRace: UsuallyTravelRace.GO_ALONE,
+        phoneCountryCode: '+54',
+        phoneNumber: '1123456789',
         imageName: 'profile.jpg',
         user: { 
           id: 1,
@@ -366,6 +378,8 @@ describe('UserProfileService', () => {
         gender: mockProfile.gender,
         runningExperience: mockProfile.runningExperience,
         usuallyTravelRace: mockProfile.usuallyTravelRace,
+        phoneCountryCode: mockProfile.phoneCountryCode,
+        phoneNumber: mockProfile.phoneNumber,
         imageName: mockProfile.imageName,
         user: mockProfile.user,
         cars: mockProfile.cars,
@@ -428,6 +442,8 @@ describe('UserProfileService', () => {
         gender: Gender.MASCULINE,
         runningExperience: RunningExperience.INTERMEDIATE,
         usuallyTravelRace: UsuallyTravelRace.GO_ALONE,
+        phoneCountryCode: '+54',
+        phoneNumber: '1123456789',
         imageName: 'profile.jpg',
         user: { 
           id: 1,

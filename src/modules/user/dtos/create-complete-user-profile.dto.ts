@@ -93,6 +93,16 @@ export class CreateCompleteUserProfileDto {
   @IsEnum(UsuallyTravelRace)
   usuallyTravelRace: UsuallyTravelRace;
 
+  @IsString()
+  @IsNotEmpty()
+  @Length(1, 10)
+  phoneCountryCode: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Length(1, 20)
+  phoneNumber: string;
+
   @IsOptional()
   @IsString()
   @Length(0, 255)

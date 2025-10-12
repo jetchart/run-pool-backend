@@ -36,6 +36,8 @@ export class UserProfileService {
       gender: entity.gender,
       runningExperience: entity.runningExperience,
       usuallyTravelRace: entity.usuallyTravelRace,
+      phoneCountryCode: entity.phoneCountryCode,
+      phoneNumber: entity.phoneNumber,
       imageName: entity.imageName,
       user: {
         id: entity.user.id,
@@ -102,6 +104,8 @@ export class UserProfileService {
         gender: dto.gender,
         runningExperience: dto.runningExperience,
         usuallyTravelRace: dto.usuallyTravelRace,
+        phoneCountryCode: dto.phoneCountryCode,
+        phoneNumber: dto.phoneNumber,
         imageName: dto.imageName,
       });
 
@@ -247,6 +251,8 @@ export class UserProfileService {
     if (dto.gender !== undefined) existingProfile.gender = dto.gender;
     if (dto.runningExperience !== undefined) existingProfile.runningExperience = dto.runningExperience;
     if (dto.usuallyTravelRace !== undefined) existingProfile.usuallyTravelRace = dto.usuallyTravelRace;
+    if (dto.phoneCountryCode !== undefined) existingProfile.phoneCountryCode = dto.phoneCountryCode;
+    if (dto.phoneNumber !== undefined) existingProfile.phoneNumber = dto.phoneNumber;
     if (dto.imageName !== undefined) existingProfile.imageName = dto.imageName;
 
     await manager.save(UserProfileEntity, existingProfile);

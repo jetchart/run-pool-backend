@@ -67,7 +67,7 @@ describe('RaceService', () => {
 
       expect(result).toEqual(mockRaces);
       expect(raceRepository.find).toHaveBeenCalledWith({
-        relations: ['distances', 'distances.distance'],
+        relations: ['distances'],
         order: { startDate: 'ASC' },
       });
     });
@@ -79,7 +79,7 @@ describe('RaceService', () => {
 
       expect(result).toEqual([]);
       expect(raceRepository.find).toHaveBeenCalledWith({
-        relations: ['distances', 'distances.distance'],
+        relations: ['distances'],
         order: { startDate: 'ASC' },
       });
     });

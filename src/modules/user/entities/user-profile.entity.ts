@@ -73,6 +73,20 @@ export class UserProfileEntity {
   })
   usuallyTravelRace: UsuallyTravelRace;
 
+  @Column({
+    name: 'phone_country_code',
+    type: 'varchar',
+    length: 10,
+  })
+  phoneCountryCode: string;
+
+  @Column({
+    name: 'phone_number',
+    type: 'varchar',
+    length: 20,
+  })
+  phoneNumber: string;
+
   @OneToMany(() => UserProfileRaceTypeEntity, (userProfileRaceType) => userProfileRaceType.userProfile)
   preferredRaceTypes: UserProfileRaceTypeEntity[];
 
