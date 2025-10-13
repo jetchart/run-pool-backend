@@ -135,6 +135,9 @@ export class UpdateUserProfileDto {
   imageName?: string;
 
   @IsOptional()
+  imageFile?: Buffer;
+
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => UpdateUserProfileCarDto)

@@ -9,7 +9,10 @@ import {
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UserProfileService } from '../services/user-profile.service';
 import { CreateCompleteUserProfileDto } from '../dtos/create-complete-user-profile.dto';
 import { UpdateUserProfileDto } from '../dtos/update-user-profile.dto';
@@ -21,9 +24,17 @@ export class UserProfileController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(FileInterceptor('imageFile'))
   async createCompleteProfile(
     @Body() createCompleteUserProfileDto: CreateCompleteUserProfileDto,
+    @UploadedFile() imageFile?: any,
   ): Promise<UserProfileResponse> {
+    if (imageFile) {
+      createCompleteUserProfileDto.imageFile = imageFile.buffer;
+      if (!createCompleteUserProfileDto.imageName) {
+        createCompleteUserProfileDto.imageName = imageFile.originalname;
+      }
+    }
     return this.userProfileService.createCompleteProfile(createCompleteUserProfileDto);
   }
 
@@ -42,18 +53,34 @@ export class UserProfileController {
   }
 
   @Put(':id')
+  @UseInterceptors(FileInterceptor('imageFile'))
   async updateProfile(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserProfileDto: UpdateUserProfileDto,
+    @UploadedFile() imageFile?: any,
   ): Promise<UserProfileResponse> {
+    if (imageFile) {
+      updateUserProfileDto.imageFile = imageFile.buffer;
+      if (!updateUserProfileDto.imageName) {
+        updateUserProfileDto.imageName = imageFile.originalname;
+      }
+    }
     return this.userProfileService.updateProfile(id, updateUserProfileDto);
   }
 
   @Put('user/:userId')
+  @UseInterceptors(FileInterceptor('imageFile'))
   async updateProfileByUserId(
     @Param('userId', ParseIntPipe) userId: number,
     @Body() updateUserProfileDto: UpdateUserProfileDto,
+    @UploadedFile() imageFile?: any,
   ): Promise<UserProfileResponse> {
+    if (imageFile) {
+      updateUserProfileDto.imageFile = imageFile.buffer;
+      if (!updateUserProfileDto.imageName) {
+        updateUserProfileDto.imageName = imageFile.originalname;
+      }
+    }
     return this.userProfileService.updateProfileByUserId(userId, updateUserProfileDto);
   }
 

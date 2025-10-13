@@ -108,6 +108,9 @@ export class CreateCompleteUserProfileDto {
   @Length(0, 255)
   imageName?: string;
 
+  @IsOptional()
+  imageFile?: Buffer;
+
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateUserProfileCarDto)
