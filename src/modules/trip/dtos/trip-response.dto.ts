@@ -23,6 +23,17 @@ export class TripResponse {
   departureProvince: string;
   description?: string;
   seats: number;
+  passengers: {
+    id: number;
+    passenger: {
+      id: number;
+      name: string;
+      givenName: string;
+      familyName: string;
+      email: string;
+      pictureUrl: string;
+    };
+  }[];
   createdAt: Date;
   deletedAt?: Date;
 }

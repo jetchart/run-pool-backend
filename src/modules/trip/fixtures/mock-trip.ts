@@ -20,6 +20,7 @@ export const mockTrip: TripEntity = {
   departureProvince: 'Buenos Aires',
   description: 'Viaje a la carrera de 10K en La Plata. Salgo temprano para evitar el tráfico.',
   seats: 3,
+  passengers: [],
   createdAt: new Date(),
   deletedAt: undefined,
 } as TripEntity;

@@ -6,9 +6,11 @@ import {
   DeleteDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { UserEntity } from '../../user/entities/user.entity';
 import { RaceEntity } from '../../race/entities/race.entity';
+import { TripPassengerEntity } from './trip-passenger.entity';
 
 @Entity('trip')
 export class TripEntity {
@@ -59,6 +61,9 @@ export class TripEntity {
     type: 'int',
   })
   seats: number;
+
+  @OneToMany(() => TripPassengerEntity, (tripPassenger) => tripPassenger.trip)
+  passengers: TripPassengerEntity[];
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
