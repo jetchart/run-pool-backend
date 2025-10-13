@@ -21,6 +21,8 @@ export class TripResponse {
   departureHour: string;
   departureCity: string;
   departureProvince: string;
+  arrivalCity: string;
+  arrivalProvince: string;
   description?: string;
   seats: number;
   availableSeats: number;

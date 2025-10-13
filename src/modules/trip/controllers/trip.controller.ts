@@ -27,20 +27,9 @@ export class TripController {
 
   @Get()
   findAll(
-    @Query('raceId', ParseIntPipe) raceId?: number,
-    @Query('driverId', ParseIntPipe) driverId?: number,
-    @Query('passengerId', ParseIntPipe) passengerId?: number,
+    @Query('raceId', ParseIntPipe) raceId: number,
   ): Promise<TripResponse[]> {
-    if (raceId) {
-      return this.tripService.findByRace(raceId);
-    }
-    if (driverId) {
-      return this.tripService.findByDriver(driverId);
-    }
-    if (passengerId) {
-      return this.tripService.findByPassenger(passengerId);
-    }
-    return this.tripService.findAll();
+    return this.tripService.findByRace(raceId);
   }
 
   @Get(':id')

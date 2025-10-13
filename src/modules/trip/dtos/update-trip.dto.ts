@@ -33,6 +33,16 @@ export class UpdateTripDto {
 
   @IsOptional()
   @IsString()
+  @Length(1, 100)
+  arrivalCity?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 100)
+  arrivalProvince?: string;
+
+  @IsOptional()
+  @IsString()
   @Length(0, 1000)
   description?: string;
 

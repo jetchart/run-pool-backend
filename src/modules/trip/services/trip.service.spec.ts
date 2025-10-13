@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository, QueryRunner, Connection } from 'typeorm';
+import { Repository, QueryRunner, Connection, IsNull } from 'typeorm';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { TripService } from './trip.service';
 import { TripEntity } from '../entities/trip.entity';
@@ -276,7 +276,7 @@ describe('TripService', () => {
 
       // Assert
       expect(tripRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 1, deletedAt: null },
+        where: { id: 1, deletedAt: IsNull() },
         relations: ['driver', 'passengers', 'passengers.passenger'],
       });
       expect(userRepository.findOne).toHaveBeenCalledWith({
@@ -354,7 +354,7 @@ describe('TripService', () => {
       // Assert
       expect(tripPassengerRepository.update).toHaveBeenCalledWith(
         1,
-        { deletedAt: null, updatedAt: expect.any(Date) }
+        { deletedAt: undefined, updatedAt: expect.any(Date) }
       );
       expect(result).toBeDefined();
     });
@@ -381,7 +381,7 @@ describe('TripService', () => {
         where: {
           trip: { id: tripId },
           passenger: { id: passengerId },
-          deletedAt: null,
+          deletedAt: IsNull(),
         },
         relations: ['trip', 'trip.driver'],
       });

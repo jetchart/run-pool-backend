@@ -32,6 +32,8 @@ describe('TripController', () => {
     departureHour: '08:30',
     departureCity: 'Buenos Aires',
     departureProvince: 'Buenos Aires',
+    arrivalCity: 'La Plata',
+    arrivalProvince: 'Buenos Aires',
     description: 'Viaje a carrera',
     seats: 4,
     availableSeats: 3,
@@ -95,6 +97,8 @@ describe('TripController', () => {
         departureHour: '08:30',
         departureCity: 'Buenos Aires',
         departureProvince: 'Buenos Aires',
+        arrivalCity: 'La Plata',
+        arrivalProvince: 'Buenos Aires',
         description: 'Viaje a carrera',
         seats: 4,
       };
@@ -114,22 +118,9 @@ describe('TripController', () => {
   });
 
   describe('findAll', () => {
-    it('should return all trips with availableSeats', async () => {
+    it('should filter by raceId and return trips with availableSeats', async () => {
       // Arrange
-      service.findAll.mockResolvedValue([mockTripResponse]);
-
-      // Act
-      const result = await controller.findAll();
-
-      // Assert
-      expect(service.findAll).toHaveBeenCalled();
-      expect(result).toEqual([mockTripResponse]);
-      expect(result[0].availableSeats).toBe(3);
-    });
-
-    it('should filter by raceId when provided', async () => {
-      // Arrange
-      const raceId = 1;
+      const raceId = 1; // ParseIntPipe converts to number
       service.findByRace.mockResolvedValue([mockTripResponse]);
 
       // Act
@@ -137,7 +128,10 @@ describe('TripController', () => {
 
       // Assert
       expect(service.findByRace).toHaveBeenCalledWith(raceId);
+      expect(result).toEqual([mockTripResponse]);
       expect(result[0].availableSeats).toBe(3);
+      expect(result[0].arrivalCity).toBe('La Plata');
+      expect(result[0].arrivalProvince).toBe('Buenos Aires');
     });
   });
 

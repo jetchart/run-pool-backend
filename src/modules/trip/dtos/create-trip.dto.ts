@@ -40,6 +40,16 @@ export class CreateTripDto {
   @Length(1, 100)
   departureProvince: string;
 
+  @IsString()
+  @IsNotEmpty()  
+  @Length(1, 100)
+  arrivalCity: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Length(1, 100)
+  arrivalProvince: string;
+
   @IsOptional()
   @IsString()
   @Length(0, 1000)

@@ -11,6 +11,8 @@ export const mockTripEntity = (overrides?: Partial<TripEntity>): TripEntity => {
   trip.departureHour = '08:30';
   trip.departureCity = 'Buenos Aires';
   trip.departureProvince = 'Buenos Aires';
+  trip.arrivalCity = 'La Plata';
+  trip.arrivalProvince = 'Buenos Aires';
   trip.description = 'Viaje a carrera 10K';
   trip.seats = 4;
   trip.passengers = [];

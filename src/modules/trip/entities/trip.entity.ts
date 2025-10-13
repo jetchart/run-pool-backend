@@ -52,6 +52,20 @@ export class TripEntity {
   departureProvince: string;
 
   @Column({
+    name: 'arrival_city',
+    type: 'varchar',
+    length: 100,
+  })
+  arrivalCity: string;
+
+  @Column({
+    name: 'arrival_province',
+    type: 'varchar',
+    length: 100,
+  })
+  arrivalProvince: string;
+
+  @Column({
     type: 'text',
     nullable: true,
   })

@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, IsNull } from 'typeorm';
 import { TripEntity } from '../entities/trip.entity';
 import { TripPassengerEntity } from '../entities/trip-passenger.entity';
 import { UserEntity } from '../../user/entities/user.entity';
@@ -88,7 +88,7 @@ export class TripService {
   async findAll(): Promise<TripResponse[]> {
     const trips = await this.tripRepository.find({
       relations: ['driver', 'race', 'passengers', 'passengers.passenger'],
-      where: { deletedAt: null },
+      where: { deletedAt: IsNull() },
       order: { createdAt: 'DESC' },
     });
 
@@ -104,7 +104,7 @@ export class TripService {
       relations: ['driver', 'race', 'passengers', 'passengers.passenger'],
       where: { 
         race: { id: raceId },
-        deletedAt: null 
+        deletedAt: IsNull() 
       },
       order: { createdAt: 'DESC' },
     });
@@ -117,7 +117,7 @@ export class TripService {
       relations: ['driver', 'race', 'passengers', 'passengers.passenger'],
       where: { 
         driver: { id: driverId },
-        deletedAt: null 
+        deletedAt: IsNull() 
       },
       order: { createdAt: 'DESC' },
     });
@@ -143,7 +143,7 @@ export class TripService {
 
   async update(id: number, updateTripDto: UpdateTripDto): Promise<TripResponse> {
     const trip = await this.tripRepository.findOne({
-      where: { id, deletedAt: null },
+      where: { id, deletedAt: IsNull() },
       relations: ['driver', 'race'],
     });
 
@@ -164,15 +164,7 @@ export class TripService {
 
 
 
-    // Verificar nueva carrera si se actualiza
-    if (updateTripDto.raceId) {
-      const race = await this.raceRepository.findOne({
-        where: { id: updateTripDto.raceId },
-      });
-      if (!race) {
-        throw new NotFoundException('Race not found');
-      }
-    }
+
 
     // Actualizar el viaje
     await this.tripRepository.update(id, updateTripDto);
@@ -182,7 +174,7 @@ export class TripService {
 
   async remove(id: number): Promise<void> {
     const trip = await this.tripRepository.findOne({
-      where: { id, deletedAt: null },
+      where: { id, deletedAt: IsNull() },
     });
 
     if (!trip) {
@@ -223,7 +215,7 @@ export class TripService {
 
     // Buscar el viaje con pasajeros
     const trip = await this.tripRepository.findOne({
-      where: { id: tripId, deletedAt: null },
+      where: { id: tripId, deletedAt: IsNull() },
       relations: ['driver', 'passengers', 'passengers.passenger'],
     });
 
@@ -264,7 +256,7 @@ export class TripService {
         // Reactivar reserva eliminada
         await this.tripPassengerRepository.update(
           existingReservation.id,
-          { deletedAt: null, updatedAt: new Date() }
+          { deletedAt: undefined, updatedAt: new Date() }
         );
         
         return this.mapToTripPassengerResponse(existingReservation, passenger);
@@ -287,7 +279,7 @@ export class TripService {
       where: {
         trip: { id: tripId },
         passenger: { id: passengerId },
-        deletedAt: null,
+        deletedAt: IsNull(),
       },
       relations: ['trip', 'trip.driver'],
     });
@@ -311,7 +303,7 @@ export class TripService {
     const tripPassengers = await this.tripPassengerRepository.find({
       where: {
         trip: { id: tripId },
-        deletedAt: null,
+        deletedAt: IsNull(),
       },
       relations: ['passenger'],
       order: { createdAt: 'ASC' },
@@ -322,7 +314,7 @@ export class TripService {
 
   private async findOneWithPassengers(id: number): Promise<TripResponse> {
     const trip = await this.tripRepository.findOne({
-      where: { id, deletedAt: null },
+      where: { id, deletedAt: IsNull() },
       relations: ['driver', 'race', 'passengers', 'passengers.passenger'],
     });
 
@@ -359,6 +351,8 @@ export class TripService {
       departureHour: trip.departureHour,
       departureCity: trip.departureCity,
       departureProvince: trip.departureProvince,
+      arrivalCity: trip.arrivalCity,
+      arrivalProvince: trip.arrivalProvince,
       description: trip.description,
       seats: trip.seats,
       availableSeats: trip.seats - activePassengers.length,
