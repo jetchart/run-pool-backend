@@ -23,6 +23,7 @@ export class TripResponse {
   departureProvince: string;
   description?: string;
   seats: number;
+  availableSeats: number;
   passengers: {
     id: number;
     passenger: {

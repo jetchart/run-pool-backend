@@ -36,9 +36,5 @@ export class UpdateTripDto {
   @Length(0, 1000)
   description?: string;
 
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  @Max(8)
-  seats?: number;
+
 }
