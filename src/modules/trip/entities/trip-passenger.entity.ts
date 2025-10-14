@@ -7,12 +7,13 @@ import {
   ManyToOne,
   JoinColumn,
   Unique,
+  Index,
 } from 'typeorm';
 import { TripEntity } from './trip.entity';
 import { UserEntity } from '../../user/entities/user.entity';
 
 @Entity('trip_passenger')
-@Unique(['trip', 'passenger'])
+@Index(['trip', 'passenger'])
 export class TripPassengerEntity {
   @PrimaryGeneratedColumn('increment')
   id: number;
