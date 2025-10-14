@@ -49,6 +49,6 @@ export class AuthService {
     );
 
     const access_token = this.jwtService.sign({ sub: persistedUser.email });
-    return existingUser? this.userService.findUserWithProfile(existingUser.id) : new UserCredentialDto(userDto, access_token);
+    return existingUser? {...await this.userService.findUserWithProfile(existingUser.id), accessToken: access_token}  : new UserCredentialDto(userDto, access_token);
   }
 }
