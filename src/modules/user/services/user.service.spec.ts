@@ -1,8 +1,12 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { NotFoundException } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserEntity } from '../entities/user.entity';
+import { UserProfileEntity } from '../entities/user-profile.entity';
+import { CarEntity } from '../entities/car.entity';
+import { UserCredentialDto } from '../dtos/user-credential.dto';
 import { Repository } from 'typeorm';
 
 const mockUser = {
@@ -15,6 +19,44 @@ const mockUser = {
   createdAt: new Date(),
   updatedAt: new Date(),
   deletedAt: undefined,
+};
+
+const mockCar: CarEntity = {
+  id: 1,
+  brand: 'Toyota',
+  model: 'Corolla',
+  year: 2020,
+  color: 'Blue',
+  seats: 5,
+  licensePlate: 'ABC123',
+  userProfile: {} as UserProfileEntity,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+
+const mockUserProfile: UserProfileEntity = {
+  id: 1,
+  name: 'John',
+  surname: 'Doe',
+  email: 'john@example.com',
+  birthYear: 1990,
+  gender: 1,
+  runningExperience: 1,
+  usuallyTravelRace: 1,
+  phoneCountryCode: '+1',
+  phoneNumber: '1234567890',
+  imageName: 'profile.jpg',
+  user: mockUser as UserEntity,
+  cars: [mockCar],
+  preferredRaceTypes: [],
+  preferredDistances: [],
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+
+const mockUserWithProfile = {
+  ...mockUser,
+  userProfile: mockUserProfile,
 };
 
 describe('UserService', () => {
@@ -90,5 +132,79 @@ describe('UserService', () => {
     repo.delete.mockResolvedValue(undefined as any);
     await service.remove(1);
     expect(repo.delete).toHaveBeenCalledWith(1);
+  });
+
+  describe('findUserWithProfile', () => {
+    it('should return UserCredentialDto with userProfile when user exists with profile', async () => {
+      repo.findOne.mockResolvedValue(mockUserWithProfile as UserEntity);
+
+      const result = await service.findUserWithProfile(1);
+
+      expect(result).toBeInstanceOf(UserCredentialDto);
+      expect(result.userId).toBe(1);
+      expect(result.email).toBe('john@example.com');
+      expect(result.name).toBe('John');
+      expect(result.userProfile).toBeDefined();
+      expect(result.userProfile?.id).toBe(1);
+      expect(result.userProfile?.name).toBe('John');
+      expect(result.userProfile?.surname).toBe('Doe');
+      expect(result.userProfile?.cars).toHaveLength(1);
+      expect(result.userProfile?.cars[0].brand).toBe('Toyota');
+      expect(result.userProfile?.cars[0].model).toBe('Corolla');
+      expect(result.userProfile?.cars[0].licensePlate).toBe('ABC123');
+
+      expect(repo.findOne).toHaveBeenCalledWith({
+        where: { id: 1 },
+        relations: ['userProfile', 'userProfile.cars', 'userProfile.preferredRaceTypes', 'userProfile.preferredDistances']
+      });
+    });
+
+    it('should return UserCredentialDto without userProfile when user exists but has no profile', async () => {
+      repo.findOne.mockResolvedValue(mockUser as UserEntity);
+
+      const result = await service.findUserWithProfile(1);
+
+      expect(result).toBeInstanceOf(UserCredentialDto);
+      expect(result.userId).toBe(1);
+      expect(result.email).toBe('john@example.com');
+      expect(result.name).toBe('John');
+      expect(result.userProfile).toBeUndefined();
+
+      expect(repo.findOne).toHaveBeenCalledWith({
+        where: { id: 1 },
+        relations: ['userProfile', 'userProfile.cars', 'userProfile.preferredRaceTypes', 'userProfile.preferredDistances']
+      });
+    });
+
+    it('should throw NotFoundException when user does not exist', async () => {
+      repo.findOne.mockResolvedValue(null);
+
+      await expect(service.findUserWithProfile(999)).rejects.toThrow(NotFoundException);
+      await expect(service.findUserWithProfile(999)).rejects.toThrow('User not found');
+
+      expect(repo.findOne).toHaveBeenCalledWith({
+        where: { id: 999 },
+        relations: ['userProfile', 'userProfile.cars', 'userProfile.preferredRaceTypes', 'userProfile.preferredDistances']
+      });
+    });
+
+    it('should handle user with profile but no cars', async () => {
+      const userWithProfileNoCars = {
+        ...mockUser,
+        userProfile: {
+          ...mockUserProfile,
+          cars: [],
+        },
+      };
+      repo.findOne.mockResolvedValue(userWithProfileNoCars as UserEntity);
+
+      const result = await service.findUserWithProfile(1);
+
+      expect(result).toBeInstanceOf(UserCredentialDto);
+      expect(result.userProfile).toBeDefined();
+      expect(result.userProfile?.cars).toHaveLength(0);
+      expect(result.userProfile?.preferredRaceTypes).toHaveLength(0);
+      expect(result.userProfile?.preferredDistances).toHaveLength(0);
+    });
   });
 });

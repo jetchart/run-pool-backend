@@ -5,7 +5,9 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  OneToOne,
 } from 'typeorm';
+import { UserProfileEntity } from './user-profile.entity';
 
 @Entity('user')
 export class UserEntity {
@@ -26,6 +28,9 @@ export class UserEntity {
 
   @Column({ type: 'varchar', length: 255, unique: true })
   email: string;
+
+  @OneToOne(() => UserProfileEntity, (userProfile) => userProfile.user)
+  userProfile?: UserProfileEntity;
 
   @CreateDateColumn()
   createdAt: Date;
