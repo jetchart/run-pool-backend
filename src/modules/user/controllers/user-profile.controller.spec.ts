@@ -147,17 +147,6 @@ describe('UserProfileController', () => {
       expect(service.createCompleteProfile).toHaveBeenCalledWith(mockDto);
     });
 
-    it('should throw BadRequestException when license plate already exists', async () => {
-      mockUserProfileService.createCompleteProfile.mockRejectedValue(
-        new BadRequestException('License plates already exist: ABC123'),
-      );
-
-      await expect(controller.createCompleteProfile(mockDto)).rejects.toThrow(
-        new BadRequestException('License plates already exist: ABC123'),
-      );
-
-      expect(service.createCompleteProfile).toHaveBeenCalledWith(mockDto);
-    });
   });
 
   describe('findCompleteProfile', () => {

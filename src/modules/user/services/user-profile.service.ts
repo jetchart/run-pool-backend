@@ -113,17 +113,6 @@ export class UserProfileService {
 
       // 4. Crear los coches si existen
       if (dto.cars && dto.cars.length > 0) {
-        // Verificar que las matrículas no estén duplicadas
-        const licensePlates = dto.cars.map(car => car.licensePlate);
-        const existingCars = await manager.find(CarEntity, {
-          where: licensePlates.map(plate => ({ licensePlate: plate })),
-        });
-
-        if (existingCars.length > 0) {
-          const duplicatePlates = existingCars.map(car => car.licensePlate);
-          throw new BadRequestException(`License plates already exist: ${duplicatePlates.join(', ')}`);
-        }
-
         const cars = dto.cars.map(carDto => 
           manager.create(CarEntity, {
             ...carDto,
@@ -261,22 +250,6 @@ export class UserProfileService {
     if (dto.cars) {
       // Eliminar coches existentes
       await manager.delete(CarEntity, { userProfile: { id: userProfileId } });
-
-      // Verificar que las matrículas no estén duplicadas
-      const licensePlates = dto.cars
-        .filter(car => car.licensePlate)
-        .map(car => car.licensePlate!);
-      
-      if (licensePlates.length > 0) {
-        const existingCars = await manager.find(CarEntity, {
-          where: licensePlates.map(plate => ({ licensePlate: plate })),
-        });
-
-        if (existingCars.length > 0) {
-          const duplicatePlates = existingCars.map(car => car.licensePlate);
-          throw new BadRequestException(`License plates already exist: ${duplicatePlates.join(', ')}`);
-        }
-      }
 
       // Crear nuevos coches
       if (dto.cars.length > 0) {

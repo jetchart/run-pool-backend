@@ -26,7 +26,6 @@ describe('TripController', () => {
       startDate: new Date('2025-12-25'),
       endDate: new Date('2025-12-25'),
       location: 'La Plata',
-      price: 0,
     },
     departureDay: new Date('2025-12-25'),
     departureHour: '08:30',

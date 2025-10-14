@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { UserEntity } from '../../user/entities/user.entity';
 import { RaceEntity } from '../../race/entities/race.entity';
+import { CarEntity } from '../../user/entities/car.entity';
 import { TripPassengerEntity } from './trip-passenger.entity';
 
 @Entity('trip')
@@ -24,6 +25,10 @@ export class TripEntity {
   @ManyToOne(() => RaceEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'race_id' })
   race: RaceEntity;
+
+  @ManyToOne(() => CarEntity, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'car_id' })
+  car: CarEntity;
 
   @Column({
     name: 'departure_day',

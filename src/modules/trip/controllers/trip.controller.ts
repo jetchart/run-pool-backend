@@ -16,7 +16,7 @@ import { UpdateTripDto } from '../dtos/update-trip.dto';
 import { JoinTripDto } from '../dtos/join-trip.dto';
 import { TripResponse } from '../dtos/trip-response.dto';
 import { TripPassengerResponse } from '../dtos/trip-passenger-response.dto';
-import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 
 @Controller('trips')
 export class TripController {

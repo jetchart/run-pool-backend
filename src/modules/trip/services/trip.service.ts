@@ -5,6 +5,8 @@ import { TripEntity } from '../entities/trip.entity';
 import { TripPassengerEntity } from '../entities/trip-passenger.entity';
 import { UserEntity } from '../../user/entities/user.entity';
 import { RaceEntity } from '../../race/entities/race.entity';
+import { CarEntity } from '../../user/entities/car.entity';
+import { UserProfileEntity } from '../../user/entities/user-profile.entity';
 import { CreateTripDto } from '../dtos/create-trip.dto';
 import { UpdateTripDto } from '../dtos/update-trip.dto';
 import { JoinTripDto } from '../dtos/join-trip.dto';
@@ -22,6 +24,10 @@ export class TripService {
     private readonly userRepository: Repository<UserEntity>,
     @InjectRepository(RaceEntity)
     private readonly raceRepository: Repository<RaceEntity>,
+    @InjectRepository(CarEntity)
+    private readonly carRepository: Repository<CarEntity>,
+    @InjectRepository(UserProfileEntity)
+    private readonly userProfileRepository: Repository<UserProfileEntity>,
   ) {}
 
   async create(createTripDto: CreateTripDto): Promise<TripResponse> {
@@ -39,6 +45,30 @@ export class TripService {
     });
     if (!race) {
       throw new NotFoundException('Race not found');
+    }
+
+    // Obtener automáticamente el car del conductor (obligatorio)
+    // Buscar el userProfile del driver y sus cars
+    const userProfile = await this.userProfileRepository.findOne({
+      where: { 
+        user: { id: createTripDto.driverId },
+        deletedAt: IsNull()
+      },
+      relations: ['cars']
+    });
+
+    if (!userProfile) {
+      throw new NotFoundException('Driver profile not found');
+    }
+
+    if (!userProfile.cars || userProfile.cars.length === 0) {
+      throw new BadRequestException('Driver must have at least one car registered');
+    }
+
+    // Tomar el primer car activo (no eliminado)
+    const car = userProfile.cars.find(c => !c.deletedAt);
+    if (!car) {
+      throw new BadRequestException('Driver must have at least one active car');
     }
 
     // Validar que la fecha de salida no sea en el pasado
@@ -63,12 +93,13 @@ export class TripService {
         ...createTripDto,
         driver,
         race,
+        car,
       });
       const savedTrip = await queryRunner.manager.save(TripEntity, trip);
 
       // Agregar al conductor como pasajero automáticamente
       const driverAsPassenger = this.tripPassengerRepository.create({
-        trip: savedTrip,
+        trip: savedTrip as TripEntity,
         passenger: driver,
       });
       await queryRunner.manager.save(TripPassengerEntity, driverAsPassenger);
@@ -76,7 +107,7 @@ export class TripService {
       await queryRunner.commitTransaction();
 
       // Retornar el viaje completo con pasajeros
-      return this.findOneWithPassengers(savedTrip.id);
+      return this.findOneWithPassengers((savedTrip as TripEntity).id);
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
@@ -87,7 +118,7 @@ export class TripService {
 
   async findAll(): Promise<TripResponse[]> {
     const trips = await this.tripRepository.find({
-      relations: ['driver', 'race', 'passengers', 'passengers.passenger'],
+      relations: ['driver', 'race', 'car', 'passengers', 'passengers.passenger'],
       where: { deletedAt: IsNull() },
       order: { createdAt: 'DESC' },
     });
@@ -101,7 +132,7 @@ export class TripService {
 
   async findByRace(raceId: number): Promise<TripResponse[]> {
     const trips = await this.tripRepository.find({
-      relations: ['driver', 'race', 'passengers', 'passengers.passenger'],
+      relations: ['driver', 'race', 'car', 'passengers', 'passengers.passenger'],
       where: { 
         race: { id: raceId },
         deletedAt: IsNull() 
@@ -114,7 +145,7 @@ export class TripService {
 
   async findByDriver(driverId: number): Promise<TripResponse[]> {
     const trips = await this.tripRepository.find({
-      relations: ['driver', 'race', 'passengers', 'passengers.passenger'],
+      relations: ['driver', 'race', 'car', 'passengers', 'passengers.passenger'],
       where: { 
         driver: { id: driverId },
         deletedAt: IsNull() 
@@ -144,7 +175,7 @@ export class TripService {
   async update(id: number, updateTripDto: UpdateTripDto): Promise<TripResponse> {
     const trip = await this.tripRepository.findOne({
       where: { id, deletedAt: IsNull() },
-      relations: ['driver', 'race'],
+      relations: ['driver', 'race', 'car'],
     });
 
     if (!trip) {
@@ -315,7 +346,7 @@ export class TripService {
   private async findOneWithPassengers(id: number): Promise<TripResponse> {
     const trip = await this.tripRepository.findOne({
       where: { id, deletedAt: IsNull() },
-      relations: ['driver', 'race', 'passengers', 'passengers.passenger'],
+      relations: ['driver', 'race', 'car', 'passengers', 'passengers.passenger'],
     });
 
     if (!trip) {
@@ -345,7 +376,15 @@ export class TripService {
         startDate: new Date(trip.race.startDate),
         endDate: new Date(trip.race.endDate),
         location: trip.race.location,
-        price: 0, // TODO: Add price field to RaceEntity if needed
+      },
+      car: {
+        id: trip.car.id,
+        brand: trip.car.brand,
+        model: trip.car.model,
+        year: trip.car.year,
+        color: trip.car.color,
+        seats: trip.car.seats,
+        licensePlate: trip.car.licensePlate,
       },
       departureDay: trip.departureDay,
       departureHour: trip.departureHour,

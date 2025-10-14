@@ -245,18 +245,6 @@ describe('UserProfileService', () => {
       );
     });
 
-    it('should throw BadRequestException when license plate already exists', async () => {
-      const existingCar = { licensePlate: 'ABC123' } as CarEntity;
-      mockManager.findOne
-        .mockResolvedValueOnce(mockUser)
-        .mockResolvedValueOnce(null);
-      mockManager.find.mockResolvedValueOnce([existingCar]);
-      mockDataSource.transaction.mockImplementation(async (cb) => cb(mockManager));
-
-      await expect(service.createCompleteProfile(mockDto)).rejects.toThrow(
-        new BadRequestException('License plates already exist: ABC123'),
-      );
-    });
   });
 
   describe('findCompleteProfile', () => {

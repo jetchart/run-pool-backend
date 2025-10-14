@@ -1,5 +1,19 @@
 import { TripEntity } from '../entities/trip.entity';
 import { mockRace } from '../../race/fixtures/mock-race';
+import { CarEntity } from '../../user/entities/car.entity';
+
+const mockCar: CarEntity = {
+  id: 1,
+  brand: 'Toyota',
+  model: 'Corolla',
+  year: 2020,
+  color: 'Blue',
+  seats: 5,
+  licensePlate: 'ABC123',
+  userProfile: {} as any,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
 
 export const mockTrip: TripEntity = {
   id: 1,
@@ -14,6 +28,7 @@ export const mockTrip: TripEntity = {
     updatedAt: new Date(),
   },
   race: mockRace,
+  car: mockCar,
   departureDay: new Date('2025-10-15'),
   departureHour: '08:30',
   departureCity: 'Buenos Aires',

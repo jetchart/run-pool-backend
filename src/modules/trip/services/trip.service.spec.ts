@@ -7,11 +7,47 @@ import { TripEntity } from '../entities/trip.entity';
 import { TripPassengerEntity } from '../entities/trip-passenger.entity';
 import { UserEntity } from '../../user/entities/user.entity';
 import { RaceEntity } from '../../race/entities/race.entity';
+import { CarEntity } from '../../user/entities/car.entity';
+import { UserProfileEntity } from '../../user/entities/user-profile.entity';
 import { mockCreateTripDto } from '../fixtures/mock-create-trip-dto';
 import { mockTripEntity } from '../fixtures/mock-trip-entity';
 import { mockUserEntity } from '../../user/fixtures/mock-user-entity';
 import { mockRaceEntity } from '../../race/fixtures/mock-race-entity';
 import { mockTripPassengerEntity } from '../fixtures/mock-trip-passenger';
+
+// Mock CarEntity
+const mockCarEntity = (): CarEntity => ({
+  id: 1,
+  brand: 'Toyota',
+  model: 'Corolla',
+  year: 2020,
+  color: 'Blue',
+  seats: 5,
+  licensePlate: 'ABC123',
+  userProfile: {} as UserProfileEntity,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+});
+
+// Mock UserProfileEntity with car
+const mockUserProfileEntity = (): UserProfileEntity => ({
+  id: 1,
+  user: mockUserEntity(),
+  name: 'John',
+  surname: 'Doe',
+  email: 'john@example.com',
+  birthYear: 1990,
+  gender: 1,
+  runningExperience: 1,
+  usuallyTravelRace: 1,
+  phoneCountryCode: '+1',
+  phoneNumber: '1234567890',
+  cars: [mockCarEntity()],
+  preferredRaceTypes: [],
+  preferredDistances: [],
+  createdAt: new Date(),
+  updatedAt: new Date(),
+});
 
 describe('TripService', () => {
   let service: TripService;
@@ -19,6 +55,8 @@ describe('TripService', () => {
   let tripPassengerRepository: jest.Mocked<Repository<TripPassengerEntity>>;
   let userRepository: jest.Mocked<Repository<UserEntity>>;
   let raceRepository: jest.Mocked<Repository<RaceEntity>>;
+  let carRepository: jest.Mocked<Repository<CarEntity>>;
+  let userProfileRepository: jest.Mocked<Repository<UserProfileEntity>>;
   let mockQueryRunner: jest.Mocked<QueryRunner>;
 
   beforeEach(async () => {
@@ -80,6 +118,18 @@ describe('TripService', () => {
             findOne: jest.fn(),
           },
         },
+        {
+          provide: getRepositoryToken(CarEntity),
+          useValue: {
+            findOne: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(UserProfileEntity),
+          useValue: {
+            findOne: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
@@ -88,6 +138,11 @@ describe('TripService', () => {
     tripPassengerRepository = module.get(getRepositoryToken(TripPassengerEntity));
     userRepository = module.get(getRepositoryToken(UserEntity));
     raceRepository = module.get(getRepositoryToken(RaceEntity));
+    carRepository = module.get(getRepositoryToken(CarEntity));
+    userProfileRepository = module.get(getRepositoryToken(UserProfileEntity));
+
+    // Setup default mock for userProfileRepository (with valid car)
+    userProfileRepository.findOne.mockResolvedValue(mockUserProfileEntity());
   });
 
   afterEach(() => {
@@ -100,11 +155,13 @@ describe('TripService', () => {
       const createTripDto = mockCreateTripDto();
       const driver = mockUserEntity();
       const race = mockRaceEntity();
+      const userProfile = mockUserProfileEntity();
       const savedTrip = mockTripEntity();
       const driverAsPassenger = mockTripPassengerEntity();
 
       userRepository.findOne.mockResolvedValue(driver);
       raceRepository.findOne.mockResolvedValue(race);
+      userProfileRepository.findOne.mockResolvedValue(userProfile);
       tripRepository.create.mockReturnValue(savedTrip);
       tripPassengerRepository.create.mockReturnValue(driverAsPassenger);
       (mockQueryRunner.manager.save as jest.Mock)
@@ -128,12 +185,20 @@ describe('TripService', () => {
       expect(raceRepository.findOne).toHaveBeenCalledWith({
         where: { id: createTripDto.raceId },
       });
+      expect(userProfileRepository.findOne).toHaveBeenCalledWith({
+        where: { 
+          user: { id: createTripDto.driverId },
+          deletedAt: IsNull()
+        },
+        relations: ['cars']
+      });
       expect(mockQueryRunner.connect).toHaveBeenCalled();
       expect(mockQueryRunner.startTransaction).toHaveBeenCalled();
       expect(tripRepository.create).toHaveBeenCalledWith({
         ...createTripDto,
         driver,
         race,
+        car: userProfile.cars[0],
       });
       expect(mockQueryRunner.manager.save).toHaveBeenCalledWith(TripEntity, savedTrip);
       expect(tripPassengerRepository.create).toHaveBeenCalledWith({
@@ -170,6 +235,54 @@ describe('TripService', () => {
       expect(raceRepository.findOne).toHaveBeenCalledWith({
         where: { id: createTripDto.raceId },
       });
+    });
+
+    it('should throw NotFoundException when driver profile not found', async () => {
+      // Arrange
+      const createTripDto = mockCreateTripDto();
+      const driver = mockUserEntity();
+      const race = mockRaceEntity();
+
+      userRepository.findOne.mockResolvedValue(driver);
+      raceRepository.findOne.mockResolvedValue(race);
+      userProfileRepository.findOne.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(service.create(createTripDto)).rejects.toThrow(NotFoundException);
+      await expect(service.create(createTripDto)).rejects.toThrow('Driver profile not found');
+    });
+
+    it('should throw BadRequestException when driver has no cars', async () => {
+      // Arrange
+      const createTripDto = mockCreateTripDto();
+      const driver = mockUserEntity();
+      const race = mockRaceEntity();
+      const userProfileWithoutCars = { ...mockUserProfileEntity(), cars: [] };
+
+      userRepository.findOne.mockResolvedValue(driver);
+      raceRepository.findOne.mockResolvedValue(race);
+      userProfileRepository.findOne.mockResolvedValue(userProfileWithoutCars);
+
+      // Act & Assert
+      await expect(service.create(createTripDto)).rejects.toThrow(BadRequestException);
+      await expect(service.create(createTripDto)).rejects.toThrow('Driver must have at least one car registered');
+    });
+
+    it('should throw BadRequestException when driver has no active cars', async () => {
+      // Arrange
+      const createTripDto = mockCreateTripDto();
+      const driver = mockUserEntity();
+      const race = mockRaceEntity();
+      const deletedCar = { ...mockCarEntity(), deletedAt: new Date() };
+      const userProfileWithDeletedCars = { ...mockUserProfileEntity(), cars: [deletedCar] };
+
+      userRepository.findOne.mockResolvedValue(driver);
+      raceRepository.findOne.mockResolvedValue(race);
+      userProfileRepository.findOne.mockResolvedValue(userProfileWithDeletedCars);
+
+      // Act & Assert
+      await expect(service.create(createTripDto)).rejects.toThrow(BadRequestException);
+      await expect(service.create(createTripDto)).rejects.toThrow('Driver must have at least one active car');
     });
 
     it('should throw BadRequestException when departure date is in the past', async () => {
