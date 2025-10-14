@@ -18,7 +18,7 @@ export class UserEntity {
   @Column({ name: 'given_name', type: 'varchar', length: 255 })
   givenName: string;
 
-  @Column({ name: 'family_name', type: 'varchar', length: 255 })
+  @Column({ name: 'family_name', type: 'varchar', length: 255, nullable: true })
   familyName: string;
 
   @Column({ name: 'picture_url', type: 'varchar', length: 255 })
