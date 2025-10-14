@@ -30,7 +30,7 @@ export class CarEntity {
   @Column({ type: 'int' })
   seats: number;
 
-  @Column({ name: 'license_plate', length: 20, unique: true })
+  @Column({ name: 'license_plate', length: 20 })
   licensePlate: string;
 
   @ManyToOne(() => UserProfileEntity, (userProfile) => userProfile.cars, { 
