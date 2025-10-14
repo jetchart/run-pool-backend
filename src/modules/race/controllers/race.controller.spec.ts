@@ -1,5 +1,6 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
+import { NotFoundException } from '@nestjs/common';
 import { RaceController } from './race.controller';
 import { RaceService } from '../services/race.service';
 import { CreateRaceDto } from '../dtos/create-race.dto';
@@ -19,6 +20,7 @@ describe('RaceController', () => {
           provide: RaceService,
           useValue: {
             findAll: jest.fn(),
+            findOne: jest.fn(),
             create: jest.fn(),
           },
         },
@@ -64,6 +66,47 @@ describe('RaceController', () => {
 
       await expect(controller.findAll()).rejects.toThrow('Service error');
       expect(raceService.findAll).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('findOne', () => {
+    it('should return a race by id', async () => {
+      const raceId = 1;
+      raceService.findOne.mockResolvedValue(mockRaceWithDistances);
+
+      const result = await controller.findOne(raceId);
+
+      expect(result).toEqual(mockRaceWithDistances);
+      expect(raceService.findOne).toHaveBeenCalledTimes(1);
+      expect(raceService.findOne).toHaveBeenCalledWith(raceId);
+    });
+
+    it('should throw NotFoundException when race does not exist', async () => {
+      const raceId = 999;
+      raceService.findOne.mockRejectedValue(new NotFoundException(`Race with ID ${raceId} not found`));
+
+      await expect(controller.findOne(raceId)).rejects.toThrow(NotFoundException);
+      await expect(controller.findOne(raceId)).rejects.toThrow(`Race with ID ${raceId} not found`);
+      expect(raceService.findOne).toHaveBeenCalledTimes(2);
+      expect(raceService.findOne).toHaveBeenCalledWith(raceId);
+    });
+
+    it('should handle service errors', async () => {
+      const raceId = 1;
+      const error = new Error('Database connection error');
+      raceService.findOne.mockRejectedValue(error);
+
+      await expect(controller.findOne(raceId)).rejects.toThrow('Database connection error');
+      expect(raceService.findOne).toHaveBeenCalledTimes(1);
+      expect(raceService.findOne).toHaveBeenCalledWith(raceId);
+    });
+
+    it('should handle invalid id parameter', async () => {
+      const invalidId = -1;
+      raceService.findOne.mockRejectedValue(new NotFoundException(`Race with ID ${invalidId} not found`));
+
+      await expect(controller.findOne(invalidId)).rejects.toThrow(NotFoundException);
+      expect(raceService.findOne).toHaveBeenCalledWith(invalidId);
     });
   });
 

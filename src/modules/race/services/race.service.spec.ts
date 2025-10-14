@@ -2,6 +2,7 @@ import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { NotFoundException } from '@nestjs/common';
 import { RaceService } from './race.service';
 import { RaceEntity } from '../entities/race.entity';
 import { RaceDistanceEntity } from '../entities/race-distance.entity';
@@ -89,6 +90,56 @@ describe('RaceService', () => {
       raceRepository.find.mockRejectedValue(error);
 
       await expect(service.findAll()).rejects.toThrow('Database connection failed');
+    });
+  });
+
+  describe('findOne', () => {
+    it('should return a race by id with distances', async () => {
+      const raceId = 1;
+      raceRepository.findOne.mockResolvedValue(mockRaceWithDistances);
+
+      const result = await service.findOne(raceId);
+
+      expect(result).toEqual(mockRaceWithDistances);
+      expect(raceRepository.findOne).toHaveBeenCalledWith({
+        where: { id: raceId },
+        relations: ['distances', 'distances.distance'],
+      });
+    });
+
+    it('should throw NotFoundException when race does not exist', async () => {
+      const raceId = 999;
+      raceRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.findOne(raceId)).rejects.toThrow(NotFoundException);
+      await expect(service.findOne(raceId)).rejects.toThrow(`Race with ID ${raceId} not found`);
+      expect(raceRepository.findOne).toHaveBeenCalledWith({
+        where: { id: raceId },
+        relations: ['distances', 'distances.distance'],
+      });
+    });
+
+    it('should handle database errors', async () => {
+      const raceId = 1;
+      const dbError = new Error('Database connection failed');
+      raceRepository.findOne.mockRejectedValue(dbError);
+
+      await expect(service.findOne(raceId)).rejects.toThrow('Database connection failed');
+      expect(raceRepository.findOne).toHaveBeenCalledWith({
+        where: { id: raceId },
+        relations: ['distances', 'distances.distance'],
+      });
+    });
+
+    it('should return race without distances when none exist', async () => {
+      const raceId = 1;
+      const raceWithoutDistances = { ...mockRace, distances: [] };
+      raceRepository.findOne.mockResolvedValue(raceWithoutDistances);
+
+      const result = await service.findOne(raceId);
+
+      expect(result).toEqual(raceWithoutDistances);
+      expect(result.distances).toEqual([]);
     });
   });
 

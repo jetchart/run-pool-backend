@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, Post, Param, ParseIntPipe, UsePipes, ValidationPipe } from '@nestjs/common';
 import { RaceService } from '../services/race.service';
 import { CreateRaceDto } from '../dtos/create-race.dto';
 import { RaceEntity } from '../entities/race.entity';
@@ -10,6 +10,11 @@ export class RaceController {
   @Get()
   async findAll(): Promise<RaceEntity[]> {
     return this.raceService.findAll();
+  }
+
+  @Get(':id')
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<RaceEntity> {
+    return this.raceService.findOne(id);
   }
 
   @Post()

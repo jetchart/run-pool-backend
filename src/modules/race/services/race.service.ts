@@ -1,5 +1,5 @@
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RaceEntity } from '../entities/race.entity';
@@ -21,6 +21,19 @@ export class RaceService {
       relations: ['distances'],
       order: { startDate: 'ASC' },
     });
+  }
+
+  async findOne(id: number): Promise<RaceEntity> {
+    const race = await this.raceRepository.findOne({
+      where: { id },
+      relations: ['distances'],
+    });
+
+    if (!race) {
+      throw new NotFoundException(`Race with ID ${id} not found`);
+    }
+
+    return race;
   }
 
   async create(data: CreateRaceDto): Promise<RaceEntity> {
