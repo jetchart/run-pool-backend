@@ -390,7 +390,8 @@ describe('TripService', () => {
       // Assert
       expect(tripRepository.findOne).toHaveBeenCalledWith({
         where: { id: 1, deletedAt: IsNull() },
-        relations: ['driver', 'passengers', 'passengers.passenger'],
+        relations: ['driver', 'car', 'passengers', 'passengers.passenger'],
+        withDeleted: true,
       });
       expect(userRepository.findOne).toHaveBeenCalledWith({
         where: { id: 2 },

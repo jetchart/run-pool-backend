@@ -103,7 +103,7 @@ describe('RaceService', () => {
       expect(result).toEqual(mockRaceWithDistances);
       expect(raceRepository.findOne).toHaveBeenCalledWith({
         where: { id: raceId },
-        relations: ['distances', 'distances.distance'],
+        relations: ['distances'],
       });
     });
 
@@ -115,7 +115,7 @@ describe('RaceService', () => {
       await expect(service.findOne(raceId)).rejects.toThrow(`Race with ID ${raceId} not found`);
       expect(raceRepository.findOne).toHaveBeenCalledWith({
         where: { id: raceId },
-        relations: ['distances', 'distances.distance'],
+        relations: ['distances'],
       });
     });
 
@@ -127,7 +127,7 @@ describe('RaceService', () => {
       await expect(service.findOne(raceId)).rejects.toThrow('Database connection failed');
       expect(raceRepository.findOne).toHaveBeenCalledWith({
         where: { id: raceId },
-        relations: ['distances', 'distances.distance'],
+        relations: ['distances'],
       });
     });
 

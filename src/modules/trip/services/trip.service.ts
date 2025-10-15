@@ -121,6 +121,7 @@ export class TripService {
       relations: ['driver', 'race', 'car', 'passengers', 'passengers.passenger'],
       where: { deletedAt: IsNull() },
       order: { createdAt: 'DESC' },
+      withDeleted: true, // Incluye cars aunque estén eliminados
     });
 
     return trips.map(this.mapToTripResponse);
@@ -138,6 +139,7 @@ export class TripService {
         deletedAt: IsNull() 
       },
       order: { createdAt: 'DESC' },
+      withDeleted: true, // Incluye cars aunque estén eliminados
     });
 
     return trips.map(this.mapToTripResponse);
@@ -151,6 +153,7 @@ export class TripService {
         deletedAt: IsNull() 
       },
       order: { createdAt: 'DESC' },
+      withDeleted: true, // Incluye cars aunque estén eliminados
     });
 
     return trips.map(this.mapToTripResponse);
@@ -161,8 +164,10 @@ export class TripService {
       .createQueryBuilder('trip')
       .leftJoinAndSelect('trip.driver', 'driver')
       .leftJoinAndSelect('trip.race', 'race')
+      .leftJoinAndSelect('trip.car', 'car')
       .leftJoinAndSelect('trip.passengers', 'passengers')
       .leftJoinAndSelect('passengers.passenger', 'passenger')
+      .withDeleted() // Incluye cars aunque estén eliminados
       .where('trip.deletedAt IS NULL')
       .andWhere('passengers.passenger.id = :passengerId', { passengerId })
       .andWhere('passengers.deletedAt IS NULL')
@@ -176,6 +181,7 @@ export class TripService {
     const trip = await this.tripRepository.findOne({
       where: { id, deletedAt: IsNull() },
       relations: ['driver', 'race', 'car'],
+      withDeleted: true, // Incluye cars aunque estén eliminados
     });
 
     if (!trip) {
@@ -247,7 +253,8 @@ export class TripService {
     // Buscar el viaje con pasajeros
     const trip = await this.tripRepository.findOne({
       where: { id: tripId, deletedAt: IsNull() },
-      relations: ['driver', 'passengers', 'passengers.passenger'],
+      relations: ['driver', 'car', 'passengers', 'passengers.passenger'],
+      withDeleted: true, // Incluye cars aunque estén eliminados
     });
 
     if (!trip) {
@@ -347,6 +354,7 @@ export class TripService {
     const trip = await this.tripRepository.findOne({
       where: { id, deletedAt: IsNull() },
       relations: ['driver', 'race', 'car', 'passengers', 'passengers.passenger'],
+      withDeleted: true, // Incluye cars aunque estén eliminados
     });
 
     if (!trip) {
