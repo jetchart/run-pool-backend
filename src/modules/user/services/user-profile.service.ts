@@ -249,7 +249,7 @@ export class UserProfileService {
     // Actualizar coches si están presentes
     if (dto.cars) {
       // Eliminar coches existentes
-      await manager.softDelete(CarEntity, { userProfileId: userProfileId });
+      await manager.delete(CarEntity, { userProfile: { id: userProfileId } });
 
       // Crear nuevos coches
       if (dto.cars.length > 0) {
