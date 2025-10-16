@@ -81,6 +81,7 @@ describe('TripService', () => {
 
     // Mock QueryBuilder
     mockQueryBuilder = {
+      withDeleted: jest.fn().mockReturnThis(),
       leftJoinAndSelect: jest.fn().mockReturnThis(),
       where: jest.fn().mockReturnThis(),
       andWhere: jest.fn().mockReturnThis(),

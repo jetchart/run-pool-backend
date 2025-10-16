@@ -119,9 +119,10 @@ export class TripService {
   async findAll(): Promise<TripResponse[]> {
     const trips = await this.tripRepository
       .createQueryBuilder('trip')
+      .withDeleted() // Incluir entidades soft-deleted
       .leftJoinAndSelect('trip.driver', 'driver')
       .leftJoinAndSelect('trip.race', 'race')
-      .leftJoinAndSelect('trip.car', 'car') // Sin restricción de deletedAt para car
+      .leftJoinAndSelect('trip.car', 'car') // Incluirá cars con soft-delete
       .leftJoinAndSelect('trip.passengers', 'passengers', 'passengers.deletedAt IS NULL')
       .leftJoinAndSelect('passengers.passenger', 'passenger')
       .where('trip.deletedAt IS NULL')
@@ -138,9 +139,10 @@ export class TripService {
   async findByRace(raceId: number): Promise<TripResponse[]> {
     const trips = await this.tripRepository
       .createQueryBuilder('trip')
+      .withDeleted() // Incluir entidades soft-deleted
       .leftJoinAndSelect('trip.driver', 'driver')
       .leftJoinAndSelect('trip.race', 'race')
-      .leftJoinAndSelect('trip.car', 'car') // Sin restricción de deletedAt para car
+      .leftJoinAndSelect('trip.car', 'car') // Incluirá cars con soft-delete
       .leftJoinAndSelect('trip.passengers', 'passengers', 'passengers.deletedAt IS NULL')
       .leftJoinAndSelect('passengers.passenger', 'passenger')
       .where('trip.deletedAt IS NULL')
@@ -154,9 +156,10 @@ export class TripService {
   async findByDriver(driverId: number): Promise<TripResponse[]> {
     const trips = await this.tripRepository
       .createQueryBuilder('trip')
+      .withDeleted() // Incluir entidades soft-deleted
       .leftJoinAndSelect('trip.driver', 'driver')
       .leftJoinAndSelect('trip.race', 'race')
-      .leftJoinAndSelect('trip.car', 'car') // Sin restricción de deletedAt para car
+      .leftJoinAndSelect('trip.car', 'car') // Incluirá cars con soft-delete
       .leftJoinAndSelect('trip.passengers', 'passengers', 'passengers.deletedAt IS NULL')
       .leftJoinAndSelect('passengers.passenger', 'passenger')
       .where('trip.deletedAt IS NULL')
@@ -170,9 +173,10 @@ export class TripService {
   async findByPassenger(passengerId: number): Promise<TripResponse[]> {
     const trips = await this.tripRepository
       .createQueryBuilder('trip')
+      .withDeleted() // Incluir entidades soft-deleted
       .leftJoinAndSelect('trip.driver', 'driver')
       .leftJoinAndSelect('trip.race', 'race')
-      .leftJoinAndSelect('trip.car', 'car') // Sin restricción de deletedAt para car
+      .leftJoinAndSelect('trip.car', 'car') // Incluirá cars con soft-delete
       .leftJoinAndSelect('trip.passengers', 'passengers')
       .leftJoinAndSelect('passengers.passenger', 'passenger')
       .where('trip.deletedAt IS NULL')
@@ -363,9 +367,10 @@ export class TripService {
   private async findOneWithPassengers(id: number): Promise<TripResponse> {
     const trip = await this.tripRepository
       .createQueryBuilder('trip')
+      .withDeleted() // Incluir entidades soft-deleted
       .leftJoinAndSelect('trip.driver', 'driver')
       .leftJoinAndSelect('trip.race', 'race')
-      .leftJoinAndSelect('trip.car', 'car') // Sin restricción de deletedAt para car
+      .leftJoinAndSelect('trip.car', 'car') // Incluirá cars con soft-delete
       .leftJoinAndSelect('trip.passengers', 'passengers', 'passengers.deletedAt IS NULL')
       .leftJoinAndSelect('passengers.passenger', 'passenger')
       .where('trip.id = :id', { id })
