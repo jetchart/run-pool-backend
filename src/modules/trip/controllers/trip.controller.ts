@@ -37,6 +37,14 @@ export class TripController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('passenger/:passengerId')
+  findByPassenger(
+    @Param('passengerId', ParseIntPipe) passengerId: number,
+  ): Promise<TripResponse[]> {
+    return this.tripService.findByPassenger(passengerId);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number): Promise<TripResponse> {
     return this.tripService.findOne(id);
