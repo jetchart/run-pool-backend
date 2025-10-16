@@ -117,12 +117,16 @@ export class TripService {
   }
 
   async findAll(): Promise<TripResponse[]> {
-    const trips = await this.tripRepository.find({
-      relations: ['driver', 'race', 'car', 'passengers', 'passengers.passenger'],
-      where: { deletedAt: IsNull() },
-      order: { createdAt: 'DESC' },
-      withDeleted: true, // Incluye cars aunque estén eliminados
-    });
+    const trips = await this.tripRepository
+      .createQueryBuilder('trip')
+      .leftJoinAndSelect('trip.driver', 'driver')
+      .leftJoinAndSelect('trip.race', 'race')
+      .leftJoinAndSelect('trip.car', 'car') // Sin restricción de deletedAt para car
+      .leftJoinAndSelect('trip.passengers', 'passengers', 'passengers.deletedAt IS NULL')
+      .leftJoinAndSelect('passengers.passenger', 'passenger')
+      .where('trip.deletedAt IS NULL')
+      .orderBy('trip.createdAt', 'DESC')
+      .getMany();
 
     return trips.map(this.mapToTripResponse);
   }
@@ -132,29 +136,33 @@ export class TripService {
   }
 
   async findByRace(raceId: number): Promise<TripResponse[]> {
-    const trips = await this.tripRepository.find({
-      relations: ['driver', 'race', 'car', 'passengers', 'passengers.passenger'],
-      where: { 
-        race: { id: raceId },
-        deletedAt: IsNull() 
-      },
-      order: { createdAt: 'DESC' },
-      withDeleted: true, // Incluye cars aunque estén eliminados
-    });
+    const trips = await this.tripRepository
+      .createQueryBuilder('trip')
+      .leftJoinAndSelect('trip.driver', 'driver')
+      .leftJoinAndSelect('trip.race', 'race')
+      .leftJoinAndSelect('trip.car', 'car') // Sin restricción de deletedAt para car
+      .leftJoinAndSelect('trip.passengers', 'passengers', 'passengers.deletedAt IS NULL')
+      .leftJoinAndSelect('passengers.passenger', 'passenger')
+      .where('trip.deletedAt IS NULL')
+      .andWhere('race.id = :raceId', { raceId })
+      .orderBy('trip.createdAt', 'DESC')
+      .getMany();
 
     return trips.map(this.mapToTripResponse);
   }
 
   async findByDriver(driverId: number): Promise<TripResponse[]> {
-    const trips = await this.tripRepository.find({
-      relations: ['driver', 'race', 'car', 'passengers', 'passengers.passenger'],
-      where: { 
-        driver: { id: driverId },
-        deletedAt: IsNull() 
-      },
-      order: { createdAt: 'DESC' },
-      withDeleted: true, // Incluye cars aunque estén eliminados
-    });
+    const trips = await this.tripRepository
+      .createQueryBuilder('trip')
+      .leftJoinAndSelect('trip.driver', 'driver')
+      .leftJoinAndSelect('trip.race', 'race')
+      .leftJoinAndSelect('trip.car', 'car') // Sin restricción de deletedAt para car
+      .leftJoinAndSelect('trip.passengers', 'passengers', 'passengers.deletedAt IS NULL')
+      .leftJoinAndSelect('passengers.passenger', 'passenger')
+      .where('trip.deletedAt IS NULL')
+      .andWhere('driver.id = :driverId', { driverId })
+      .orderBy('trip.createdAt', 'DESC')
+      .getMany();
 
     return trips.map(this.mapToTripResponse);
   }
@@ -164,10 +172,9 @@ export class TripService {
       .createQueryBuilder('trip')
       .leftJoinAndSelect('trip.driver', 'driver')
       .leftJoinAndSelect('trip.race', 'race')
-      .leftJoinAndSelect('trip.car', 'car')
+      .leftJoinAndSelect('trip.car', 'car') // Sin restricción de deletedAt para car
       .leftJoinAndSelect('trip.passengers', 'passengers')
       .leftJoinAndSelect('passengers.passenger', 'passenger')
-      .withDeleted() // Incluye cars aunque estén eliminados
       .where('trip.deletedAt IS NULL')
       .andWhere('passengers.passenger.id = :passengerId', { passengerId })
       .andWhere('passengers.deletedAt IS NULL')
@@ -178,11 +185,14 @@ export class TripService {
   }
 
   async update(id: number, updateTripDto: UpdateTripDto): Promise<TripResponse> {
-    const trip = await this.tripRepository.findOne({
-      where: { id, deletedAt: IsNull() },
-      relations: ['driver', 'race', 'car'],
-      withDeleted: true, // Incluye cars aunque estén eliminados
-    });
+    const trip = await this.tripRepository
+      .createQueryBuilder('trip')
+      .leftJoinAndSelect('trip.driver', 'driver')
+      .leftJoinAndSelect('trip.race', 'race')
+      .leftJoinAndSelect('trip.car', 'car') // Sin restricción de deletedAt para car
+      .where('trip.id = :id', { id })
+      .andWhere('trip.deletedAt IS NULL')
+      .getOne();
 
     if (!trip) {
       throw new NotFoundException('Trip not found');
@@ -198,10 +208,6 @@ export class TripService {
         throw new BadRequestException('Departure date cannot be in the past');
       }
     }
-
-
-
-
 
     // Actualizar el viaje
     await this.tripRepository.update(id, updateTripDto);
@@ -251,11 +257,15 @@ export class TripService {
     const { tripId, passengerId } = joinTripDto;
 
     // Buscar el viaje con pasajeros
-    const trip = await this.tripRepository.findOne({
-      where: { id: tripId, deletedAt: IsNull() },
-      relations: ['driver', 'car', 'passengers', 'passengers.passenger'],
-      withDeleted: true, // Incluye cars aunque estén eliminados
-    });
+    const trip = await this.tripRepository
+      .createQueryBuilder('trip')
+      .leftJoinAndSelect('trip.driver', 'driver')
+      .leftJoinAndSelect('trip.car', 'car') // Sin restricción de deletedAt para car
+      .leftJoinAndSelect('trip.passengers', 'passengers')
+      .leftJoinAndSelect('passengers.passenger', 'passenger')
+      .where('trip.id = :tripId', { tripId })
+      .andWhere('trip.deletedAt IS NULL')
+      .getOne();
 
     if (!trip) {
       throw new NotFoundException('Trip not found');
@@ -351,11 +361,16 @@ export class TripService {
   }
 
   private async findOneWithPassengers(id: number): Promise<TripResponse> {
-    const trip = await this.tripRepository.findOne({
-      where: { id, deletedAt: IsNull() },
-      relations: ['driver', 'race', 'car', 'passengers', 'passengers.passenger'],
-      withDeleted: true, // Incluye cars aunque estén eliminados
-    });
+    const trip = await this.tripRepository
+      .createQueryBuilder('trip')
+      .leftJoinAndSelect('trip.driver', 'driver')
+      .leftJoinAndSelect('trip.race', 'race')
+      .leftJoinAndSelect('trip.car', 'car') // Sin restricción de deletedAt para car
+      .leftJoinAndSelect('trip.passengers', 'passengers', 'passengers.deletedAt IS NULL')
+      .leftJoinAndSelect('passengers.passenger', 'passenger')
+      .where('trip.id = :id', { id })
+      .andWhere('trip.deletedAt IS NULL')
+      .getOne();
 
     if (!trip) {
       throw new NotFoundException('Trip not found');

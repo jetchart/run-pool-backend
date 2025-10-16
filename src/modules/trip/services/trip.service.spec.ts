@@ -58,6 +58,7 @@ describe('TripService', () => {
   let carRepository: jest.Mocked<Repository<CarEntity>>;
   let userProfileRepository: jest.Mocked<Repository<UserProfileEntity>>;
   let mockQueryRunner: jest.Mocked<QueryRunner>;
+  let mockQueryBuilder: any;
 
   beforeEach(async () => {
     // Mock QueryRunner
@@ -78,6 +79,16 @@ describe('TripService', () => {
       createQueryRunner: jest.fn().mockReturnValue(mockQueryRunner),
     };
 
+    // Mock QueryBuilder
+    mockQueryBuilder = {
+      leftJoinAndSelect: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      getMany: jest.fn(),
+      getOne: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TripService,
@@ -89,7 +100,7 @@ describe('TripService', () => {
             find: jest.fn(),
             findOne: jest.fn(),
             update: jest.fn(),
-            createQueryBuilder: jest.fn(),
+            createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
             manager: {
               connection: mockConnection,
             },
@@ -147,6 +158,11 @@ describe('TripService', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    // Reset mockQueryBuilder
+    if (mockQueryBuilder) {
+      mockQueryBuilder.getOne.mockReset();
+      mockQueryBuilder.getMany.mockReset();
+    }
   });
 
   describe('create', () => {
@@ -168,12 +184,12 @@ describe('TripService', () => {
         .mockResolvedValueOnce(savedTrip)
         .mockResolvedValueOnce(driverAsPassenger);
 
-      // Mock findOneWithPassengers
+      // Mock findOneWithPassengers - QueryBuilder response
       const tripWithPassengers = {
         ...savedTrip,
         passengers: [driverAsPassenger],
       };
-      tripRepository.findOne.mockResolvedValue(tripWithPassengers as any);
+      mockQueryBuilder.getOne.mockResolvedValue(tripWithPassengers);
 
       // Act
       const result = await service.create(createTripDto);
@@ -337,7 +353,7 @@ describe('TripService', () => {
         ...savedTrip,
         passengers: [driverAsPassenger],
       };
-      tripRepository.findOne.mockResolvedValue(tripWithPassengers as any);
+      mockQueryBuilder.getOne.mockResolvedValue(tripWithPassengers);
 
       // Act
       const result = await service.create(createTripDto);
@@ -379,7 +395,7 @@ describe('TripService', () => {
       const passenger = mockUserEntity({ id: 2 });
       const tripPassenger = mockTripPassengerEntity();
 
-      tripRepository.findOne.mockResolvedValue(trip as any);
+      mockQueryBuilder.getOne.mockResolvedValue(trip);
       userRepository.findOne.mockResolvedValue(passenger);
       tripPassengerRepository.create.mockReturnValue(tripPassenger);
       tripPassengerRepository.save.mockResolvedValue(tripPassenger);
@@ -388,11 +404,6 @@ describe('TripService', () => {
       const result = await service.joinTrip(joinTripDto);
 
       // Assert
-      expect(tripRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 1, deletedAt: IsNull() },
-        relations: ['driver', 'car', 'passengers', 'passengers.passenger'],
-        withDeleted: true,
-      });
       expect(userRepository.findOne).toHaveBeenCalledWith({
         where: { id: 2 },
       });
@@ -415,7 +426,7 @@ describe('TripService', () => {
       };
       const passenger = mockUserEntity({ id: 2 });
 
-      tripRepository.findOne.mockResolvedValue(trip as any);
+      mockQueryBuilder.getOne.mockResolvedValue(trip);
       userRepository.findOne.mockResolvedValue(passenger);
 
       // Act & Assert
@@ -436,7 +447,7 @@ describe('TripService', () => {
       };
       const passenger = mockUserEntity({ id: 2 });
 
-      tripRepository.findOne.mockResolvedValue(trip as any);
+      mockQueryBuilder.getOne.mockResolvedValue(trip);
       userRepository.findOne.mockResolvedValue(passenger);
 
       // Act & Assert
@@ -458,7 +469,7 @@ describe('TripService', () => {
       };
       const passenger = mockUserEntity({ id: 2 });
 
-      tripRepository.findOne.mockResolvedValue(trip as any);
+      mockQueryBuilder.getOne.mockResolvedValue(trip);
       userRepository.findOne.mockResolvedValue(passenger);
       tripPassengerRepository.update.mockResolvedValue({} as any);
 
