@@ -123,7 +123,7 @@ export class TripService {
       .leftJoinAndSelect('trip.driver', 'driver')
       .leftJoinAndSelect('trip.race', 'race')
       .leftJoinAndSelect('trip.car', 'car') // Incluirá cars con soft-delete
-      .leftJoinAndSelect('trip.passengers', 'passengers')
+      .leftJoinAndSelect('trip.passengers', 'passengers', 'passengers.deletedAt IS NULL')
       .leftJoinAndSelect('passengers.passenger', 'passenger')
       .where('trip.deletedAt IS NULL')
       .orderBy('trip.createdAt', 'DESC')
@@ -171,17 +171,30 @@ export class TripService {
   }
 
   async findByPassenger(passengerId: number): Promise<TripResponse[]> {
+    // Primero obtenemos los IDs de los trips donde está el passenger
+    const tripIds = await this.tripRepository
+      .createQueryBuilder('trip')
+      .select('trip.id')
+      .leftJoin('trip.passengers', 'passengers')
+      .where('trip.deletedAt IS NULL')
+      .andWhere('passengers.passenger.id = :passengerId', { passengerId })
+      .andWhere('passengers.deletedAt IS NULL')
+      .getMany();
+
+    if (tripIds.length === 0) {
+      return [];
+    }
+
+    // Luego obtenemos los trips completos con todos sus pasajeros
     const trips = await this.tripRepository
       .createQueryBuilder('trip')
       .withDeleted() // Incluir entidades soft-deleted
       .leftJoinAndSelect('trip.driver', 'driver')
       .leftJoinAndSelect('trip.race', 'race')
       .leftJoinAndSelect('trip.car', 'car') // Incluirá cars con soft-delete
-      .leftJoinAndSelect('trip.passengers', 'passengers')
+      .leftJoinAndSelect('trip.passengers', 'passengers', 'passengers.deletedAt IS NULL')
       .leftJoinAndSelect('passengers.passenger', 'passenger')
-      .where('trip.deletedAt IS NULL')
-      .andWhere('passengers.passenger.id = :passengerId', { passengerId })
-      .andWhere('passengers.deletedAt IS NULL')
+      .where('trip.id IN (:...tripIds)', { tripIds: tripIds.map(t => t.id) })
       .orderBy('trip.createdAt', 'DESC')
       .getMany();
 
