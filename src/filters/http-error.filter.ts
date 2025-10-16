@@ -26,31 +26,59 @@ export class HttpErrorFilter implements ExceptionFilter {
         ? exception.getResponse()
         : 'Unexpected error occurred';
 
-    // Log the error with context
+    // Enhanced log context with more details
     const logContext = {
       url: request.url,
       method: request.method,
       statusCode: status,
       userAgent: request.headers['user-agent'],
       ip: request.ip,
+      body: request.body,
+      params: request.params,
+      query: request.query,
+      headers: {
+        authorization: request.headers.authorization ? '[REDACTED]' : undefined,
+        'content-type': request.headers['content-type'],
+        'user-agent': request.headers['user-agent'],
+      },
+    };
+
+    // Enhanced error details
+    const errorDetails = {
+      name: exception instanceof Error ? exception.constructor.name : 'Unknown',
+      message: exception instanceof Error ? exception.message : String(exception),
+      stack: exception instanceof Error ? exception.stack : undefined,
+      cause: exception instanceof Error ? exception.cause : undefined,
     };
 
     if (status >= 500) {
       // Server errors (5xx) - log as error with full exception details
       this.logger.error(
-        logContext,
-        `❌ ${request.method} ${request.url} - ${status} - ${
-          exception instanceof Error ? exception.message : 'Unknown error'
-        }`,
-        exception instanceof Error ? exception.stack : exception,
+        {
+          ...logContext,
+          error: errorDetails,
+          exception: exception instanceof Error ? {
+            name: exception.constructor.name,
+            message: exception.message,
+            stack: exception.stack,
+          } : exception,
+        },
+        `❌ INTERNAL SERVER ERROR: ${request.method} ${request.url} - ${status} - ${errorDetails.message}`,
       );
     } else if (status >= 400) {
-      // Client errors (4xx) - log as warning
+      // Client errors (4xx) - log as warning with context
       this.logger.warn(
+        {
+          ...logContext,
+          error: errorDetails,
+        },
+        `⚠️  CLIENT ERROR: ${request.method} ${request.url} - ${status} - ${errorDetails.message}`,
+      );
+    } else {
+      // Success/redirect responses that somehow ended up here
+      this.logger.log(
         logContext,
-        `⚠️  ${request.method} ${request.url} - ${status} - ${
-          exception instanceof Error ? exception.message : message
-        }`,
+        `ℹ️  ${request.method} ${request.url} - ${status} - ${errorDetails.message}`,
       );
     }
 
