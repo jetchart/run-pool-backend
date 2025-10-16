@@ -123,7 +123,7 @@ export class TripService {
       .leftJoinAndSelect('trip.driver', 'driver')
       .leftJoinAndSelect('trip.race', 'race')
       .leftJoinAndSelect('trip.car', 'car') // Incluirá cars con soft-delete
-      .leftJoinAndSelect('trip.passengers', 'passengers', 'passengers.deletedAt IS NULL')
+      .leftJoinAndSelect('trip.passengers', 'passengers')
       .leftJoinAndSelect('passengers.passenger', 'passenger')
       .where('trip.deletedAt IS NULL')
       .orderBy('trip.createdAt', 'DESC')
