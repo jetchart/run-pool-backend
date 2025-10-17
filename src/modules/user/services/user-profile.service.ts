@@ -246,26 +246,9 @@ export class UserProfileService {
 
     await manager.save(UserProfileEntity, existingProfile);
 
-    // Actualizar coches si están presentes
+    // Actualizar coches solo si cambiaron
     if (dto.cars) {
-      // Eliminar coches existentes
-      await manager.delete(CarEntity, { userProfile: { id: userProfileId } });
-
-      // Crear nuevos coches
-      if (dto.cars.length > 0) {
-        const newCars = dto.cars.map(carDto =>
-          manager.create(CarEntity, {
-            brand: carDto.brand!,
-            model: carDto.model!,
-            year: carDto.year!,
-            color: carDto.color!,
-            seats: carDto.seats!,
-            licensePlate: carDto.licensePlate!,
-            userProfile: existingProfile,
-          })
-        );
-        await manager.save(CarEntity, newCars);
-      }
+      await this.updateCarsIfChanged(manager, existingProfile, userProfileId, dto.cars);
     }
 
     // Actualizar tipos de carrera preferidos si están presentes
@@ -348,6 +331,57 @@ export class UserProfileService {
     }) as UserProfileEntity;
 
     return this.toResponse(updatedProfile);
+  }
+
+  /**
+   * Actualiza los autos del perfil solo si hay cambios respecto a los actuales.
+   */
+  private async updateCarsIfChanged(manager: any, existingProfile: UserProfileEntity, userProfileId: number, dtoCars: any[]): Promise<void> {
+    const currentCars = (existingProfile.cars || []).filter(car => !car.deletedAt);
+
+    // Función para comparar autos por campos clave
+    const carsAreEqual = (a, b) =>
+      a.brand === b.brand &&
+      a.model === b.model &&
+      a.year === b.year &&
+      a.color === b.color &&
+      a.seats === b.seats &&
+      a.licensePlate === b.licensePlate;
+
+    // Verificar si hay cambios
+    let changed = false;
+    if (currentCars.length !== dtoCars.length) {
+      changed = true;
+    } else {
+      for (let i = 0; i < currentCars.length; i++) {
+        const match = dtoCars.find(dc => carsAreEqual(dc, currentCars[i]));
+        if (!match) {
+          changed = true;
+          break;
+        }
+      }
+    }
+
+    if (changed) {
+      // Eliminar coches existentes
+      await manager.softDelete(CarEntity, { userProfile: { id: userProfileId } });
+
+      // Crear nuevos coches
+      if (dtoCars.length > 0) {
+        const newCars = dtoCars.map(carDto =>
+          manager.create(CarEntity, {
+            brand: carDto.brand!,
+            model: carDto.model!,
+            year: carDto.year!,
+            color: carDto.color!,
+            seats: carDto.seats!,
+            licensePlate: carDto.licensePlate!,
+            userProfile: existingProfile,
+          })
+        );
+        await manager.save(CarEntity, newCars);
+      }
+    }
   }
 
   async deleteProfile(userProfileId: number): Promise<void> {
