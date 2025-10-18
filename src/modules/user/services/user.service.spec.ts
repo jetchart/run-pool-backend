@@ -119,21 +119,6 @@ describe('UserService', () => {
     expect(repo.save).toHaveBeenCalledWith(mockUser);
   });
 
-  it('update should update and return the user', async () => {
-    repo.update.mockResolvedValue(undefined as any);
-    jest.spyOn(service, 'findOne').mockResolvedValue(mockUser as UserEntity);
-    const user = await service.update(1, { name: 'Jane' });
-    expect(user).toEqual(mockUser);
-    expect(repo.update).toHaveBeenCalledWith(1, { name: 'Jane' });
-    expect(service.findOne).toHaveBeenCalledWith(1);
-  });
-
-  it('remove should delete the user', async () => {
-    repo.delete.mockResolvedValue(undefined as any);
-    await service.remove(1);
-    expect(repo.delete).toHaveBeenCalledWith(1);
-  });
-
   describe('findUserWithProfile', () => {
     it('should return UserCredentialDto with userProfile when user exists with profile', async () => {
       repo.findOne.mockResolvedValue(mockUserWithProfile as UserEntity);

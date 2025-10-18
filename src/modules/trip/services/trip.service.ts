@@ -398,7 +398,7 @@ export class TripService {
   }
 
   private mapToTripResponse(trip: TripEntity): TripResponse {
-    const activePassengers = trip.passengers?.filter(p => !p.deletedAt) || [];
+    const passengers = (trip.passengers?.sort((a, b) => a.id - b.id)) || [];
 
     return {
       id: trip.id,
@@ -435,8 +435,8 @@ export class TripService {
       arrivalProvince: trip.arrivalProvince,
       description: trip.description,
       seats: trip.seats,
-      availableSeats: trip.seats - activePassengers.length,
-      passengers: activePassengers.map(tp => ({
+      availableSeats: trip.seats - passengers.length,
+      passengers: passengers.map(tp => ({
         id: tp.id,
         passenger: {
           id: tp.passenger.id,

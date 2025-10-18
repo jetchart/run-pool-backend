@@ -32,18 +32,6 @@ export class UserService {
     return this.userRepository.save(user);
   }
 
-  async update(
-    id: number,
-    userData: Partial<UserEntity>,
-  ): Promise<UserEntity | null> {
-    await this.userRepository.update(id, userData);
-    return this.findOne(id);
-  }
-
-  async remove(id: number): Promise<void> {
-    await this.userRepository.delete(id);
-  }
-
   async findUserWithProfile(userId: number): Promise<UserCredentialDto> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
