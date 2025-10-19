@@ -112,4 +112,12 @@ export class RaceService {
     // Devolver la entidad con relaciones
     return this.raceRepository.findOne({ where: { id }, relations: ['distances'] }) as Promise<RaceEntity>;
   }
+
+  async softDelete(id: number): Promise<void> {
+    const race = await this.raceRepository.findOne({ where: { id } });
+    if (!race) {
+      throw new NotFoundException(`Race with ID ${id} not found`);
+    }
+    await this.raceRepository.softDelete(id);
+  }
 }

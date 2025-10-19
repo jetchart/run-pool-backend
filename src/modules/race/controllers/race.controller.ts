@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Param, ParseIntPipe, UsePipes, ValidationPipe, Put } from '@nestjs/common';
+import { Body, Controller, Get, Post, Param, ParseIntPipe, UsePipes, ValidationPipe, Put, Delete } from '@nestjs/common';
 import { RaceService } from '../services/race.service';
 import { CreateRaceDto } from '../dtos/create-race.dto';
 import { RaceEntity } from '../entities/race.entity';
@@ -30,5 +30,10 @@ export class RaceController {
     @Body() updateRaceDto: UpdateRaceDto,
   ): Promise<RaceEntity> {
     return this.raceService.update(id, updateRaceDto);
+  }
+
+  @Delete(':id')
+  async softDelete(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    await this.raceService.softDelete(id);
   }
 }
