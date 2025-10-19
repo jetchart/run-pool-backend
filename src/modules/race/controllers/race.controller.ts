@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Post, Param, ParseIntPipe, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, Post, Param, ParseIntPipe, UsePipes, ValidationPipe, Put } from '@nestjs/common';
 import { RaceService } from '../services/race.service';
 import { CreateRaceDto } from '../dtos/create-race.dto';
 import { RaceEntity } from '../entities/race.entity';
+import { UpdateRaceDto } from '../dtos/update-race.dto';
 
 @Controller('races')
 export class RaceController {
@@ -20,5 +21,14 @@ export class RaceController {
   @Post()
   async create(@Body() createRaceDto: CreateRaceDto): Promise<RaceEntity> {
     return this.raceService.create(createRaceDto);
+  }
+
+  @Put(':id')
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: false }))
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateRaceDto: UpdateRaceDto,
+  ): Promise<RaceEntity> {
+    return this.raceService.update(id, updateRaceDto);
   }
 }

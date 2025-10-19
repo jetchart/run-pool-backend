@@ -168,12 +168,12 @@ describe('RaceService', () => {
       expect(raceRepository.save).toHaveBeenCalledWith(mockRace);
       expect(raceDistanceRepository.create).toHaveBeenCalledWith({
         race: savedRace,
-        distance: { id: 1 },
+        distance: 1,
       });
       expect(raceDistanceRepository.save).toHaveBeenCalledWith([raceDistanceEntity]);
       expect(raceRepository.findOne).toHaveBeenCalledWith({
         where: { id: savedRace.id },
-        relations: ['distances', 'distances.distance'],
+        relations: ['distances'],
       });
       expect(result).toEqual(mockRaceWithDistances);
     });
@@ -196,7 +196,7 @@ describe('RaceService', () => {
       expect(raceDistanceRepository.save).not.toHaveBeenCalled();
       expect(raceRepository.findOne).toHaveBeenCalledWith({
         where: { id: savedRace.id },
-        relations: ['distances', 'distances.distance'],
+        relations: ['distances'],
       });
       expect(result).toEqual(mockRace);
     });
@@ -239,11 +239,11 @@ describe('RaceService', () => {
       expect(raceDistanceRepository.create).toHaveBeenCalledTimes(2);
       expect(raceDistanceRepository.create).toHaveBeenNthCalledWith(1, {
         race: savedRace,
-        distance: { id: 1 },
+        distance: 1,
       });
       expect(raceDistanceRepository.create).toHaveBeenNthCalledWith(2, {
         race: savedRace,
-        distance: { id: 2 },
+        distance: 2,
       });
       expect(raceDistanceRepository.save).toHaveBeenCalledWith(raceDistanceEntities);
       expect(result.distances).toHaveLength(2);
