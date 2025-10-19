@@ -163,4 +163,18 @@ describe('RaceController', () => {
       expect(raceService.create).toHaveBeenCalledWith(invalidDto);
     });
   });
+
+  describe('softDelete', () => {
+    it('should call service.softDelete with correct id', async () => {
+      raceService.softDelete = jest.fn().mockResolvedValue(undefined);
+      await expect(controller.softDelete(1)).resolves.toBeUndefined();
+      expect(raceService.softDelete).toHaveBeenCalledWith(1);
+    });
+
+    it('should throw NotFoundException if service throws', async () => {
+      raceService.softDelete = jest.fn().mockRejectedValue(new NotFoundException('Race not found'));
+      await expect(controller.softDelete(999)).rejects.toThrow(NotFoundException);
+      expect(raceService.softDelete).toHaveBeenCalledWith(999);
+    });
+  });
 });

@@ -305,4 +305,21 @@ describe('RaceService', () => {
       await expect(service.create(mockCreateRaceDto)).rejects.toThrow('Failed to find created race');
     });
   });
+
+  describe('softDelete', () => {
+    it('should soft delete a race by id', async () => {
+      raceRepository.findOne.mockResolvedValue(mockRace);
+      raceRepository.softDelete = jest.fn().mockResolvedValue({});
+      await expect(service.softDelete(1)).resolves.toBeUndefined();
+      expect(raceRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
+      expect(raceRepository.softDelete).toHaveBeenCalledWith(1);
+    });
+
+    it('should throw NotFoundException if race does not exist', async () => {
+      raceRepository.findOne.mockResolvedValue(null);
+      await expect(service.softDelete(999)).rejects.toThrow(NotFoundException);
+      expect(raceRepository.findOne).toHaveBeenCalledWith({ where: { id: 999 } });
+      expect(raceRepository.softDelete).not.toHaveBeenCalled();
+    });
+  });
 });
