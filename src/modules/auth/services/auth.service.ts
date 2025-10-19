@@ -37,6 +37,7 @@ export class AuthService {
           givenName: payload.given_name!,
           familyName: payload.family_name!,
           pictureUrl: payload.picture!,
+          administrator: false
         });
 
     const userDto = new UserDto(
@@ -46,6 +47,7 @@ export class AuthService {
       payload.given_name!,
       payload.family_name!,
       payload.picture!,
+false
     );
 
     const access_token = this.jwtService.sign({ sub: persistedUser.email });

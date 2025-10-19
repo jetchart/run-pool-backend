@@ -29,6 +29,9 @@ export class UserEntity {
   @Column({ type: 'varchar', length: 255, unique: true })
   email: string;
 
+    @Column({ type: 'boolean', default: false })
+  administrator: boolean;
+
   @OneToOne(() => UserProfileEntity, (userProfile) => userProfile.user)
   userProfile?: UserProfileEntity;
 

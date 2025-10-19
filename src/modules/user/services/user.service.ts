@@ -49,7 +49,8 @@ export class UserService {
       user.name,
       user.givenName,
       user.familyName,
-      user.pictureUrl
+      user.pictureUrl,
+      user.administrator
     );
 
     // Crear UserProfileResponse si existe

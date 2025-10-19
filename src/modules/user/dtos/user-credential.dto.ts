@@ -13,6 +13,7 @@ export class UserCredentialDto extends UserDto {
       user.givenName,
       user.familyName,
       user.pictureUrl,
+      user.administrator
     );
     this.accessToken = accessToken;
     this.userProfile = userProfile;

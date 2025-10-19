@@ -5,6 +5,7 @@ export class UserDto {
   givenName: string;
   familyName: string;
   pictureUrl: string;
+  administrator: boolean;
 
   constructor(
     userId: number,
@@ -13,6 +14,7 @@ export class UserDto {
     givenName: string,
     familyName: string,
     pictureUrl: string,
+    administrator: boolean
   ) {
     this.userId = userId;
     this.email = email;
@@ -20,5 +22,6 @@ export class UserDto {
     this.givenName = givenName;
     this.familyName = familyName;
     this.pictureUrl = pictureUrl;
+    this.administrator = administrator;
   }
 }

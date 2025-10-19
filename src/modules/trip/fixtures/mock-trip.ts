@@ -26,6 +26,7 @@ export const mockTrip: TripEntity = {
     pictureUrl: 'http://example.com/juan.jpg',
     createdAt: new Date(),
     updatedAt: new Date(),
+    administrator: false,
   },
   race: mockRace,
   car: mockCar,
