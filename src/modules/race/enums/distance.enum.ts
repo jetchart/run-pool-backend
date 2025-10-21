@@ -3,6 +3,7 @@ export enum Distance {
   TEN_K = 10,
   TWENTY_ONE_K = 21,
   FORTY_TWO_K = 42,
+  ONE_HUNDRED_K = 100,
 }
 
 export interface DistanceInfo {
@@ -36,5 +37,11 @@ export const DISTANCE_INFO: Record<Distance, DistanceInfo> = {
     description: '42 kilómetros',
     shortDescription: '42K',
     kilometers: 42,
+  },
+  [Distance.ONE_HUNDRED_K]: {
+    id: 100,
+    description: '100 kilómetros', 
+    shortDescription: '100K',
+    kilometers: 100,
   },
 };
