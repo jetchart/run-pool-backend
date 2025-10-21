@@ -57,10 +57,6 @@ export class UpdateRaceDto {
   website?: string;
 
   @IsOptional()
-  @IsString()
-  startLocation?: string;
-
-  @IsOptional()
   @IsEnum(RaceType)
   raceType?: RaceType;
 
