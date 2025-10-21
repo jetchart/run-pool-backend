@@ -34,6 +34,7 @@ describe('RaceService', () => {
             save: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
+            softDelete: jest.fn(),
           },
         },
         {
@@ -69,7 +70,7 @@ describe('RaceService', () => {
       expect(result).toEqual(mockRaces);
       expect(raceRepository.find).toHaveBeenCalledWith({
         relations: ['distances'],
-        order: { startDate: 'ASC' },
+        order: { startDate: 'DESC' },
       });
     });
 
@@ -81,7 +82,7 @@ describe('RaceService', () => {
       expect(result).toEqual([]);
       expect(raceRepository.find).toHaveBeenCalledWith({
         relations: ['distances'],
-        order: { startDate: 'ASC' },
+        order: { startDate: 'DESC' },
       });
     });
 
@@ -221,7 +222,7 @@ describe('RaceService', () => {
 
       const raceDistanceEntities = [
         { ...mockRaceDistance, id: 1 },
-        { ...mockRaceDistance, id: 2, distance: mockDistance2 },
+        { ...mockRaceDistance, id: 2, distance: 21 }, // Distance.TWENTY_ONE_K
       ];
 
       raceRepository.create.mockReturnValue(mockRace);
