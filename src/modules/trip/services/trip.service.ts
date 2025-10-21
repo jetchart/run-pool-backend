@@ -62,24 +62,24 @@ export class TripService {
     }
 
     if (!userProfile.cars || userProfile.cars.length === 0) {
-      throw new BadRequestException('Driver must have at least one car registered');
+  throw new BadRequestException('El conductor debe tener al menos un auto registrado');
     }
 
     // Tomar el primer car activo (no eliminado)
     const car = userProfile.cars.find(c => !c.deletedAt);
     if (!car) {
-      throw new BadRequestException('Driver must have at least one active car');
+  throw new BadRequestException('El conductor debe tener al menos un auto activo');
     }
 
     // Validar que la fecha de salida no sea en el pasado
     const departureDateTime = new Date(`${createTripDto.departureDay}T${createTripDto.departureHour}`);
     if (departureDateTime < new Date()) {
-      throw new BadRequestException('Departure date cannot be in the past');
+  throw new BadRequestException('La fecha de salida no puede ser en el pasado');
     }
 
     // Validar que haya al menos 1 asiento
     if (createTripDto.seats < 1) {
-      throw new BadRequestException('Trip must have at least 1 seat');
+  throw new BadRequestException('El viaje debe tener al menos 1 asiento');
     }
 
     // Crear el viaje usando QueryRunner para transacción
@@ -222,7 +222,7 @@ export class TripService {
       const departureDateTime = new Date(`${departureDay}T${departureHour}`);
       
       if (departureDateTime < new Date()) {
-        throw new BadRequestException('Departure date cannot be in the past');
+  throw new BadRequestException('La fecha de salida no puede ser en el pasado');
       }
     }
 
@@ -300,7 +300,7 @@ export class TripService {
     // Validar que el viaje no esté en el pasado
     const departureDateTime = new Date(`${trip.departureDay}T${trip.departureHour}`);
     if (departureDateTime < new Date()) {
-      throw new BadRequestException('Cannot join a trip that has already departed');
+  throw new BadRequestException('No se puede unir a un viaje que ya salió');
     }
 
     // Contar pasajeros activos (no eliminados)
@@ -308,7 +308,7 @@ export class TripService {
 
     // Validar capacidad
     if (activePassengers.length >= trip.seats) {
-      throw new BadRequestException('Trip is full');
+  throw new BadRequestException('El viaje está completo');
     }
 
     // Validar que no esté ya reservado (incluyendo reservas eliminadas que se pueden reactivar)
@@ -316,7 +316,7 @@ export class TripService {
     
     if (existingReservation) {
       if (!existingReservation.deletedAt) {
-        throw new BadRequestException('User already joined this trip');
+        throw new BadRequestException('El usuario ya se unió a este viaje');
       } else {
         // Reactivar reserva eliminada
         await this.tripPassengerRepository.update(
@@ -355,7 +355,7 @@ export class TripService {
 
     // Verificar que no sea el conductor (el conductor no puede salir de su propio viaje)
     if (tripPassenger.trip.driver.id === passengerId) {
-      throw new BadRequestException('Driver cannot leave their own trip. Delete the trip instead.');
+  throw new BadRequestException('El conductor no puede salir de su propio viaje. Elimine el viaje en su lugar.');
     }
 
     // Soft delete de la reserva

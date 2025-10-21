@@ -91,7 +91,7 @@ export class UserProfileService {
       });
 
       if (existingProfile) {
-        throw new BadRequestException(`User with id ${dto.userId} already has a profile`);
+  throw new BadRequestException(`El usuario con id ${dto.userId} ya tiene un perfil`);
       }
 
       // 3. Crear el perfil principal
