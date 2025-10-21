@@ -51,10 +51,6 @@ export class CreateRaceDto {
   @IsNotEmpty()
   website: string;
 
-  @IsString()
-  @IsNotEmpty()
-  startLocation: string;
-
   @IsEnum(RaceType)
   raceType: RaceType;
 
