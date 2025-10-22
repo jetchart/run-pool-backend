@@ -1,3 +1,4 @@
+import { TripRatingEntity } from './trip-rating.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -83,6 +84,9 @@ export class TripEntity {
 
   @OneToMany(() => TripPassengerEntity, (tripPassenger) => tripPassenger.trip)
   passengers: TripPassengerEntity[];
+
+  @OneToMany(() => TripRatingEntity, (rating) => rating.trip)
+  ratings: TripRatingEntity[];
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;

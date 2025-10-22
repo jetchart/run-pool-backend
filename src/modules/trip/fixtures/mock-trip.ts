@@ -41,4 +41,5 @@ export const mockTrip: TripEntity = {
   passengers: [],
   createdAt: new Date(),
   deletedAt: undefined,
+  ratings: [],
 } as TripEntity;

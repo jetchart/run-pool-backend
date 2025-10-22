@@ -11,8 +11,6 @@ import { CreateTripDto } from '../dtos/create-trip.dto';
 import { UpdateTripDto } from '../dtos/update-trip.dto';
 import { JoinTripDto } from '../dtos/join-trip.dto';
 import { TripResponse } from '../dtos/trip-response.dto';
-import { TripRatingService } from './trip-rating.service';
-import { TripRatingResponseDto } from '../dtos/trip-rating-response.dto';
 import { TripPassengerResponse } from '../dtos/trip-passenger-response.dto';
 
 @Injectable()
@@ -30,7 +28,6 @@ export class TripService {
     private readonly carRepository: Repository<CarEntity>,
     @InjectRepository(UserProfileEntity)
     private readonly userProfileRepository: Repository<UserProfileEntity>,
-    private readonly tripRatingService: TripRatingService,
   ) {}
 
   async create(createTripDto: CreateTripDto): Promise<TripResponse> {
@@ -128,19 +125,26 @@ export class TripService {
       .leftJoinAndSelect('trip.car', 'car') // Incluirá cars con soft-delete
       .leftJoinAndSelect('trip.passengers', 'passengers', 'passengers.deletedAt IS NULL')
       .leftJoinAndSelect('passengers.passenger', 'passenger')
+      .leftJoinAndSelect('trip.ratings', 'ratings')
+      .leftJoinAndSelect('ratings.rater', 'rater')
+      .leftJoinAndSelect('ratings.rated', 'rated')
       .where('trip.deletedAt IS NULL')
       .orderBy('trip.createdAt', 'DESC')
       .getMany();
 
-    // Obtener calificaciones para cada viaje
-    const ratingsByTrip: { [tripId: number]: TripRatingResponseDto[] } = {};
-    for (const trip of trips) {
-      ratingsByTrip[trip.id] = await this.tripRatingService.getRatingsForTrip(trip.id);
-    }
-
     return trips.map(trip => ({
       ...this.mapToTripResponse(trip),
-      ratings: ratingsByTrip[trip.id] || [],
+      ratings: trip.ratings ? trip.ratings.map(r => ({
+        id: r.id,
+        tripId: r.trip.id,
+        raterId: r.rater.id,
+        ratedId: r.rated.id,
+        type: r.type,
+        rating: r.rating,
+        comment: r.comment,
+        createdAt: r.createdAt,
+        updatedAt: r.updatedAt,
+      })) : [],
     }));
   }
 
@@ -206,19 +210,26 @@ export class TripService {
       .leftJoinAndSelect('trip.car', 'car') // Incluirá cars con soft-delete
       .leftJoinAndSelect('trip.passengers', 'passengers', 'passengers.deletedAt IS NULL')
       .leftJoinAndSelect('passengers.passenger', 'passenger')
+      .leftJoinAndSelect('trip.ratings', 'ratings')
+      .leftJoinAndSelect('ratings.rater', 'rater')
+      .leftJoinAndSelect('ratings.rated', 'rated')
       .where('trip.id IN (:...tripIds)', { tripIds: tripIds.map(t => t.id) })
       .orderBy('trip.createdAt', 'DESC')
       .getMany();
 
-    // Obtener calificaciones para cada viaje
-    const ratingsByTrip: { [tripId: number]: TripRatingResponseDto[] } = {};
-    for (const trip of trips) {
-      ratingsByTrip[trip.id] = await this.tripRatingService.getRatingsForTrip(trip.id);
-    }
-
     return trips.map(trip => ({
       ...this.mapToTripResponse(trip),
-      ratings: ratingsByTrip[trip.id] || [],
+      ratings: trip.ratings ? trip.ratings.filter(rating => (rating.rater.id === passengerId || rating.rated.id === passengerId)).map(r => ({
+        id: r.id,
+        tripId: trip.id,
+        raterId: r.rater.id,
+        ratedId: r.rated.id,
+        type: r.type,
+        rating: r.rating,
+        comment: r.comment,
+        createdAt: r.createdAt,
+        updatedAt: r.updatedAt,
+      })) : [],
     }));
   }
 
