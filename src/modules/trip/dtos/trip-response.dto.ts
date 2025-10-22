@@ -1,3 +1,4 @@
+import { TripRatingResponseDto } from './trip-rating-response.dto';
 export class TripResponse {
   id: number;
   driver: {
@@ -47,4 +48,5 @@ export class TripResponse {
   }[];
   createdAt: Date;
   deletedAt?: Date;
+  ratings?: TripRatingResponseDto[];
 }

@@ -13,6 +13,11 @@ export class RaceController {
     return this.raceService.findAll();
   }
 
+  @Get('past-or-today')
+  async findPastOrToday(): Promise<RaceEntity[]> {
+    return this.raceService.findPastOrToday();
+  }
+
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number): Promise<RaceEntity> {
     return this.raceService.findOne(id);
@@ -36,4 +41,5 @@ export class RaceController {
   async softDelete(@Param('id', ParseIntPipe) id: number): Promise<void> {
     await this.raceService.softDelete(id);
   }
+
 }

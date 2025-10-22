@@ -120,4 +120,14 @@ export class RaceService {
     }
     await this.raceRepository.softDelete(id);
   }
+
+  async findPastOrToday(): Promise<RaceEntity[]> {
+    const today = new Date();
+    const todayStr = today.toISOString().slice(0, 10);
+    return this.raceRepository.createQueryBuilder('race')
+      .leftJoinAndSelect('race.distances', 'distances')
+      .where('race.startDate <= :today', { today: todayStr })
+      .orderBy('race.startDate', 'DESC')
+      .getMany();
+  }
 }

@@ -11,6 +11,8 @@ import { CreateTripDto } from '../dtos/create-trip.dto';
 import { UpdateTripDto } from '../dtos/update-trip.dto';
 import { JoinTripDto } from '../dtos/join-trip.dto';
 import { TripResponse } from '../dtos/trip-response.dto';
+import { TripRatingService } from './trip-rating.service';
+import { TripRatingResponseDto } from '../dtos/trip-rating-response.dto';
 import { TripPassengerResponse } from '../dtos/trip-passenger-response.dto';
 
 @Injectable()
@@ -28,6 +30,7 @@ export class TripService {
     private readonly carRepository: Repository<CarEntity>,
     @InjectRepository(UserProfileEntity)
     private readonly userProfileRepository: Repository<UserProfileEntity>,
+    private readonly tripRatingService: TripRatingService,
   ) {}
 
   async create(createTripDto: CreateTripDto): Promise<TripResponse> {
@@ -129,7 +132,16 @@ export class TripService {
       .orderBy('trip.createdAt', 'DESC')
       .getMany();
 
-    return trips.map(this.mapToTripResponse);
+    // Obtener calificaciones para cada viaje
+    const ratingsByTrip: { [tripId: number]: TripRatingResponseDto[] } = {};
+    for (const trip of trips) {
+      ratingsByTrip[trip.id] = await this.tripRatingService.getRatingsForTrip(trip.id);
+    }
+
+    return trips.map(trip => ({
+      ...this.mapToTripResponse(trip),
+      ratings: ratingsByTrip[trip.id] || [],
+    }));
   }
 
   async findOne(id: number): Promise<TripResponse> {
@@ -198,7 +210,16 @@ export class TripService {
       .orderBy('trip.createdAt', 'DESC')
       .getMany();
 
-    return trips.map(this.mapToTripResponse);
+    // Obtener calificaciones para cada viaje
+    const ratingsByTrip: { [tripId: number]: TripRatingResponseDto[] } = {};
+    for (const trip of trips) {
+      ratingsByTrip[trip.id] = await this.tripRatingService.getRatingsForTrip(trip.id);
+    }
+
+    return trips.map(trip => ({
+      ...this.mapToTripResponse(trip),
+      ratings: ratingsByTrip[trip.id] || [],
+    }));
   }
 
   async update(id: number, updateTripDto: UpdateTripDto): Promise<TripResponse> {

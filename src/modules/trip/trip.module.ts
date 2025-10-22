@@ -8,13 +8,24 @@ import { CarEntity } from '../user/entities/car.entity';
 import { UserProfileEntity } from '../user/entities/user-profile.entity';
 import { TripService } from './services/trip.service';
 import { TripController } from './controllers/trip.controller';
+import { TripRatingEntity } from './entities/trip-rating.entity';
+import { TripRatingService } from './services/trip-rating.service';
+import { TripRatingController } from './controllers/trip-rating.controller';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([TripEntity, TripPassengerEntity, RaceEntity, UserEntity, CarEntity, UserProfileEntity]),
+    TypeOrmModule.forFeature([
+      TripEntity,
+      TripPassengerEntity,
+      RaceEntity,
+      UserEntity,
+      CarEntity,
+      UserProfileEntity,
+      TripRatingEntity,
+    ]),
   ],
-  controllers: [TripController],
-  providers: [TripService],
+  controllers: [TripController, TripRatingController],
+  providers: [TripService, TripRatingService],
   exports: [TypeOrmModule, TripService],
 })
 export class TripModule {}
