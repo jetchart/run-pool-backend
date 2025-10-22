@@ -127,7 +127,7 @@ export class RaceService {
     return this.raceRepository.createQueryBuilder('race')
       .leftJoinAndSelect('race.distances', 'distances')
       .where('race.startDate >= :today', { today: todayStr })
-      .orderBy('race.startDate', 'DESC')
+      .orderBy('race.startDate', 'ASC')
       .getMany();
   }
 }
