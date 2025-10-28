@@ -494,6 +494,7 @@ export class TripService {
         },
         status: tp.status,
       })),
+      tripType: trip.tripType,
       createdAt: trip.createdAt,
       deletedAt: trip.deletedAt,
     };
