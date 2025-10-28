@@ -18,4 +18,5 @@ export const mockRace: RaceEntity = {
   updatedAt: new Date(),
   deletedAt: undefined,
   distances: [],
+  trips: [],
 };

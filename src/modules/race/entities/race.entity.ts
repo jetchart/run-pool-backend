@@ -1,3 +1,4 @@
+import { TripEntity } from '../../trip/entities/trip.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -63,4 +64,7 @@ export class RaceEntity {
 
   @OneToMany(() => RaceDistanceEntity, (raceDistance) => raceDistance.race)
   distances: RaceDistanceEntity[];
+
+  @OneToMany(() => TripEntity, (trip) => trip.race)
+  trips: TripEntity[];
 }

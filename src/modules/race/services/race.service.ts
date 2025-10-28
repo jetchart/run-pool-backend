@@ -126,6 +126,7 @@ export class RaceService {
     const todayStr = today.toISOString().slice(0, 10);
     return this.raceRepository.createQueryBuilder('race')
       .leftJoinAndSelect('race.distances', 'distances')
+      .leftJoinAndSelect('race.trips', 'trips')
       .where('race.startDate >= :today', { today: todayStr })
       .orderBy('race.startDate', 'ASC')
       .getMany();
