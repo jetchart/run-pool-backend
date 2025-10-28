@@ -1,3 +1,4 @@
+import { TripType } from '../enums/trip-type.enum';
 import { 
   IsOptional, 
   IsString, 
@@ -10,6 +11,8 @@ import {
 } from 'class-validator';
 
 export class UpdateTripDto {
+  @IsOptional()
+  tripType?: TripType;
   @IsOptional()
   @IsDateString()
   departureDay?: string; // Format: YYYY-MM-DD

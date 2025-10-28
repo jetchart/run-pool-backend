@@ -95,6 +95,7 @@ export class TripService {
         driver,
         race,
         car,
+        tripType: createTripDto.tripType,
       });
       const savedTrip = await queryRunner.manager.save(TripEntity, trip);
 
@@ -271,7 +272,7 @@ export class TripService {
     }
 
     // Actualizar el viaje
-    await this.tripRepository.update(id, updateTripDto);
+  await this.tripRepository.update(id, updateTripDto);
 
     return this.findOneWithPassengers(id);
   }

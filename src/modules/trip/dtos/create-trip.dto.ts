@@ -1,3 +1,4 @@
+import { TripType } from '../enums/trip-type.enum';
 import { 
   IsNotEmpty, 
   IsString, 
@@ -11,6 +12,8 @@ import {
 } from 'class-validator';
 
 export class CreateTripDto {
+  @IsNotEmpty()
+  tripType: TripType;
   @IsInt()
   @IsNotEmpty()
   driverId: number;

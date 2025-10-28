@@ -1,3 +1,4 @@
+import { TripType } from '../enums/trip-type.enum';
 import { TripRatingEntity } from './trip-rating.entity';
 import {
   Entity,
@@ -87,6 +88,13 @@ export class TripEntity {
 
   @OneToMany(() => TripRatingEntity, (rating) => rating.trip)
   ratings: TripRatingEntity[];
+
+    @Column({
+    type: 'enum',
+    enum: TripType,
+    default: TripType.OUTBAND,
+  })
+  tripType: TripType;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;

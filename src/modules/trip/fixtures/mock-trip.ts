@@ -1,6 +1,7 @@
 import { TripEntity } from '../entities/trip.entity';
 import { mockRace } from '../../race/fixtures/mock-race';
 import { CarEntity } from '../../user/entities/car.entity';
+import { TripType } from '../enums/trip-type.enum';
 
 const mockCar: CarEntity = {
   id: 1,
@@ -42,4 +43,5 @@ export const mockTrip: TripEntity = {
   createdAt: new Date(),
   deletedAt: undefined,
   ratings: [],
+  tripType: TripType.OUTBAND
 } as TripEntity;

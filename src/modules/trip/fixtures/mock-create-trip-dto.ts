@@ -1,4 +1,5 @@
 import { CreateTripDto } from '../dtos/create-trip.dto';
+import { TripType } from '../enums/trip-type.enum';
 
 export const mockCreateTripDto = (overrides?: Partial<CreateTripDto>): CreateTripDto => ({
   driverId: 1,
@@ -11,5 +12,6 @@ export const mockCreateTripDto = (overrides?: Partial<CreateTripDto>): CreateTri
   arrivalProvince: 'Buenos Aires',
   description: 'Viaje a la carrera de 10K en La Plata. Salgo temprano para evitar el tráfico.',
   seats: 3,
+  tripType: TripType.OUTBAND,
   ...overrides,
 });
