@@ -1,3 +1,4 @@
+import { TripPassengerStatus } from '../enums/trip-passenger-status.enum';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -6,8 +7,8 @@ import {
   DeleteDateColumn,
   ManyToOne,
   JoinColumn,
-  Unique,
   Index,
+  Column,
 } from 'typeorm';
 import { TripEntity } from './trip.entity';
 import { UserEntity } from '../../user/entities/user.entity';
@@ -34,4 +35,11 @@ export class TripPassengerEntity {
 
   @DeleteDateColumn({ name: 'deleted_at', type: 'timestamptz' })
   deletedAt?: Date;
+
+  @Column({
+    type: 'enum',
+    enum: TripPassengerStatus,
+    default: TripPassengerStatus.PENDING,
+  })
+  status: TripPassengerStatus;
 }

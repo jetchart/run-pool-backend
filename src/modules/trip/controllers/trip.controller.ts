@@ -1,3 +1,4 @@
+import { TripPassengerStatus } from '../enums/trip-passenger-status.enum';
 import {
   Controller,
   Get,
@@ -9,6 +10,7 @@ import {
   ParseIntPipe,
   Query,
   UseGuards,
+  Put,
 } from '@nestjs/common';
 import { TripService } from '../services/trip.service';
 import { CreateTripDto } from '../dtos/create-trip.dto';
@@ -86,5 +88,14 @@ export class TripController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<TripPassengerResponse[]> {
     return this.tripService.getPassengersByTrip(id);
+  }
+
+    @UseGuards(JwtAuthGuard)
+  @Put('trip-passengers/:tripPassengerId')
+  async updatePassengerStatus(
+    @Param('tripPassengerId', ParseIntPipe) tripPassengerId: number,
+    @Query('status') status: TripPassengerStatus,
+  ): Promise<TripPassengerResponse> {
+    return this.tripService.updatePassengerStatus(tripPassengerId, status);
   }
 }

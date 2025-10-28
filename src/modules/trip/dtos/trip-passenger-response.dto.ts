@@ -11,4 +11,5 @@ export class TripPassengerResponse {
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date;
+  status: string;
 }

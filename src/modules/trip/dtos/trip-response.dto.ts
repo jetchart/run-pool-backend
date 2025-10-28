@@ -1,3 +1,4 @@
+import { TripPassengerStatus } from '../enums/trip-passenger-status.enum';
 import { TripRatingResponseDto } from './trip-rating-response.dto';
 export class TripResponse {
   id: number;
@@ -46,6 +47,7 @@ export class TripResponse {
       email: string;
       pictureUrl: string;
     };
+    status: TripPassengerStatus;
   }[];
   createdAt: Date;
   deletedAt?: Date;

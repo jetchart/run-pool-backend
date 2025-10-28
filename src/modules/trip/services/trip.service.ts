@@ -1,3 +1,4 @@
+import { TripPassengerStatus } from '../enums/trip-passenger-status.enum';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
@@ -101,6 +102,7 @@ export class TripService {
       const driverAsPassenger = this.tripPassengerRepository.create({
         trip: savedTrip as TripEntity,
         passenger: driver,
+        status: TripPassengerStatus.CONFIRMED,
       });
       await queryRunner.manager.save(TripPassengerEntity, driverAsPassenger);
 
@@ -114,6 +116,16 @@ export class TripService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async updatePassengerStatus(tripPassengerId: number, status: TripPassengerStatus): Promise<TripPassengerResponse> {
+    const tripPassenger = await this.tripPassengerRepository.findOne({ where: { id: tripPassengerId }, relations: ['passenger'] });
+    if (!tripPassenger) {
+      throw new NotFoundException('TripPassenger not found');
+    }
+    tripPassenger.status = status;
+    await this.tripPassengerRepository.save(tripPassenger);
+    return this.mapToTripPassengerResponse(tripPassenger, tripPassenger.passenger);
   }
 
   async findAll(): Promise<TripResponse[]> {
@@ -416,7 +428,7 @@ export class TripService {
       .leftJoinAndSelect('trip.driver', 'driver')
       .leftJoinAndSelect('trip.race', 'race')
       .leftJoinAndSelect('trip.car', 'car') // Incluirá cars con soft-delete
-      .leftJoinAndSelect('trip.passengers', 'passengers', 'passengers.deletedAt IS NULL')
+      .leftJoinAndSelect('trip.passengers', 'passengers', 'passengers.deletedAt IS NULL AND passengers.status != :rejected', { rejected: TripPassengerStatus.REJECTED })
       .leftJoinAndSelect('passengers.passenger', 'passenger')
       .where('trip.id = :id', { id })
       .andWhere('trip.deletedAt IS NULL')
@@ -479,6 +491,7 @@ export class TripService {
           email: tp.passenger.email,
           pictureUrl: tp.passenger.pictureUrl,
         },
+        status: tp.status,
       })),
       createdAt: trip.createdAt,
       deletedAt: trip.deletedAt,
@@ -496,6 +509,7 @@ export class TripService {
         email: passenger.email,
         pictureUrl: passenger.pictureUrl,
       },
+      status: tripPassenger.status,
       createdAt: tripPassenger.createdAt,
       updatedAt: tripPassenger.updatedAt,
       deletedAt: tripPassenger.deletedAt,
