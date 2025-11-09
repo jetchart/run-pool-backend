@@ -18,7 +18,19 @@ export class WhatsappService implements OnModuleInit {
     async onModuleInit() {
         this.client = new Client({
             authStrategy: new LocalAuth(),
-            puppeteer: { headless: true },
+            puppeteer: { 
+                headless: true,
+                args: [
+                    "--no-sandbox",
+                    "--disable-setuid-sandbox",
+                    "--disable-dev-shm-usage",
+                    "--disable-accelerated-2d-canvas",
+                    "--no-zygote",
+                    "--no-first-run",
+                    "--single-process",
+                    "--disable-gpu",
+                    ],
+            },
         });
         this.client.on('qr', (qr) => {
             qrcode.generate(qr, { small: true });
