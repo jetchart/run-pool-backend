@@ -1,3 +1,4 @@
+import { WhatsappModule } from './whatsapp/whatsapp.module';
 import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { configuration as devConfiguration } from '../config/config.development';
@@ -39,8 +40,9 @@ import { TripModule } from './trip/trip.module';
     AuthModule,
     UserModule,
     AppLoggerModule,
-    RaceModule,
-    TripModule,
+  RaceModule,
+  TripModule,
+  WhatsappModule,
   ],
   controllers: [AppController],
   providers: [AppService],

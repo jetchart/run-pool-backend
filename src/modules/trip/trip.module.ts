@@ -11,6 +11,7 @@ import { TripController } from './controllers/trip.controller';
 import { TripRatingEntity } from './entities/trip-rating.entity';
 import { TripRatingService } from './services/trip-rating.service';
 import { TripRatingController } from './controllers/trip-rating.controller';
+import { WhatsappModule } from '../whatsapp/whatsapp.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { TripRatingController } from './controllers/trip-rating.controller';
       UserProfileEntity,
       TripRatingEntity,
     ]),
+    WhatsappModule,
   ],
   controllers: [TripController, TripRatingController],
   providers: [TripService, TripRatingService],

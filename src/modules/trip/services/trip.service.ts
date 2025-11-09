@@ -1,4 +1,7 @@
 import { TripPassengerStatus } from '../enums/trip-passenger-status.enum';
+import { WhatsappService } from '../../whatsapp/services/whatsapp.service';
+import { TemplateService } from '../../whatsapp/services/template.service';
+import { WhatsappTemplate } from '../../whatsapp/templates/whatsapp-template.enum';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
@@ -29,6 +32,8 @@ export class TripService {
     private readonly carRepository: Repository<CarEntity>,
     @InjectRepository(UserProfileEntity)
     private readonly userProfileRepository: Repository<UserProfileEntity>,
+    private readonly whatsappService: WhatsappService,
+    private readonly templateService: TemplateService,
   ) {}
 
   async create(createTripDto: CreateTripDto): Promise<TripResponse> {
@@ -109,6 +114,18 @@ export class TripService {
 
       await queryRunner.commitTransaction();
 
+      const driverPhone = `${userProfile.phoneCountryCode}${userProfile.phoneNumber}`;
+      if (driverPhone) {
+        const message = this.templateService.renderTemplate(
+          WhatsappTemplate.TRIP_CREATED,
+          {
+            name: userProfile.name,
+            raceName: race.name,
+          }
+        );
+        await this.whatsappService.sendMessage([driverPhone], message);
+      }
+
       // Retornar el viaje completo con pasajeros
       return this.findOneWithPassengers((savedTrip as TripEntity).id);
     } catch (error) {
@@ -120,12 +137,31 @@ export class TripService {
   }
 
   async updatePassengerStatus(tripPassengerId: number, status: TripPassengerStatus): Promise<TripPassengerResponse> {
-    const tripPassenger = await this.tripPassengerRepository.findOne({ where: { id: tripPassengerId }, relations: ['passenger'] });
+    const tripPassenger = await this.tripPassengerRepository.findOne({ where: { id: tripPassengerId }, relations: ['passenger', 'trip', 'trip.driver', 'trip.race'] });
     if (!tripPassenger) {
       throw new NotFoundException('TripPassenger not found');
     }
     tripPassenger.status = status;
     await this.tripPassengerRepository.save(tripPassenger);
+
+    // Notificación por WhatsApp según el nuevo estado
+    const passengerProfile = await this.userProfileRepository.findOne({ where: { user: { id: tripPassenger.passenger.id } } });
+    const driverProfile = await this.userProfileRepository.findOne({ where: { user: { id: tripPassenger.trip.driver.id } } });
+    if (status === TripPassengerStatus.CONFIRMED && driverProfile && tripPassenger.trip.race && tripPassenger.trip) {
+      await this.whatsappService.notifyTripConfirmed(
+        driverProfile,
+        tripPassenger.trip.race,
+        tripPassenger.trip
+      );
+    }
+    if (status === TripPassengerStatus.REJECTED && passengerProfile && tripPassenger.trip.race && tripPassenger.trip) {
+      await this.whatsappService.notifyTripRejected(
+        passengerProfile,
+        tripPassenger.trip.race,
+        tripPassenger.trip
+      );
+    }
+
     return this.mapToTripPassengerResponse(tripPassenger, tripPassenger.passenger);
   }
 
@@ -381,6 +417,21 @@ export class TripService {
 
     const savedTripPassenger = await this.tripPassengerRepository.save(tripPassenger);
 
+    // Notificar al conductor que un pasajero se unió al viaje
+    const driverProfile = await this.userProfileRepository.findOne({
+      where: { user: { id: trip.driver.id } },
+    });
+    const passengerProfile = await this.userProfileRepository.findOne({
+      where: { user: { id: passengerId } },
+    });
+    if (driverProfile && passengerProfile) {
+      await this.whatsappService.notifyTripJoin(
+        driverProfile,
+        trip.race,
+        passengerProfile
+      );
+    }
+
     return this.mapToTripPassengerResponse(savedTripPassenger, passenger);
   }
 
@@ -391,7 +442,7 @@ export class TripService {
         passenger: { id: passengerId },
         deletedAt: IsNull(),
       },
-      relations: ['trip', 'trip.driver'],
+      relations: ['trip', 'trip.driver', 'passenger', 'trip.race'],
     });
 
     if (!tripPassenger) {
@@ -400,13 +451,28 @@ export class TripService {
 
     // Verificar que no sea el conductor (el conductor no puede salir de su propio viaje)
     if (tripPassenger.trip.driver.id === passengerId) {
-  throw new BadRequestException('El conductor no puede salir de su propio viaje. Elimine el viaje en su lugar.');
+      throw new BadRequestException('El conductor no puede salir de su propio viaje. Elimine el viaje en su lugar.');
     }
 
     // Soft delete de la reserva
     await this.tripPassengerRepository.update(tripPassenger.id, {
       deletedAt: new Date(),
     });
+
+    // Notificar al conductor que el pasajero abandonó el viaje
+    const driverProfile = await this.userProfileRepository.findOne({
+      where: { user: { id: tripPassenger.trip.driver.id } },
+    });
+    const passengerProfile = await this.userProfileRepository.findOne({
+      where: { user: { id: passengerId } },
+    });
+    if (driverProfile && passengerProfile) {
+      await this.whatsappService.notifyTripLeaved(
+        driverProfile,
+        tripPassenger.trip.race,
+        passengerProfile
+      );
+    }
   }
 
   async getPassengersByTrip(tripId: number): Promise<TripPassengerResponse[]> {
