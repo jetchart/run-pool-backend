@@ -20,19 +20,11 @@ export class WhatsappService implements OnModuleInit {
             authStrategy: new LocalAuth(),
             puppeteer: { 
                 headless: true,
-                args: [
-                    "--no-sandbox",
-                    "--disable-setuid-sandbox",
-                    "--disable-dev-shm-usage",
-                    "--disable-accelerated-2d-canvas",
-                    "--no-zygote",
-                    "--no-first-run",
-                    "--single-process",
-                    "--disable-gpu",
-                    ],
+                args: ["--no-sandbox", "--disable-setuid-sandbox"],
             },
         });
         this.client.on('qr', (qr) => {
+            console.clear();
             qrcode.generate(qr, { small: true });
             console.log('Escaneá el QR para iniciar sesión en WhatsApp Web');
         });
