@@ -1,17 +1,28 @@
+import { UserRatingDto } from '../dtos/user-rating.dto';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../entities/user.entity';
 import { UserCredentialDto } from '../dtos/user-credential.dto';
 import { UserDto } from '../dtos/user.dto';
 import { UserProfileResponse } from '../dtos/user-profile-response.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { TripRatingEntity } from '../../trip/entities/trip-rating.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
+    @InjectRepository(TripRatingEntity)
+    private tripRatingRepository: Repository<TripRatingEntity>,
   ) {}
+  async getUserRatings(userId: number): Promise<TripRatingEntity[]> {
+    return this.tripRatingRepository.find({
+      where: { rated: { id: userId } },
+      relations: ['rater', 'trip'],
+      order: { createdAt: 'DESC' },
+    });
+  }
 
   async findAll(): Promise<UserEntity[]> {
     return this.userRepository.find({
@@ -105,5 +116,12 @@ export class UserService {
     // Para este caso, como no tenemos un accessToken real, usamos un string vacío
     // En una implementación real, esto debería venir del token de autenticación
     return new UserCredentialDto(userDto, '', userProfileResponse);
+  }
+
+    async getUserWithRatingAverage(userId: number): Promise<UserRatingDto> {
+    const user = await this.findUserWithProfile(userId);
+    const ratings = await this.getUserRatings(userId);
+    const avg = ratings.length > 0 ? (ratings.reduce((acc, r) => acc + r.rating, 0) / ratings.length) : 0;
+    return new UserRatingDto(user, ratings.length, avg);
   }
 }

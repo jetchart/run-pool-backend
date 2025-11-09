@@ -12,6 +12,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { JwtStrategy } from '../auth/guards/jwt.strategy';
 import { UserService } from './services/user.service';
 import { UserProfileService } from './services/user-profile.service';
+import { TripRatingEntity } from '../trip/entities/trip-rating.entity';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { UserProfileService } from './services/user-profile.service';
       CarEntity,
       UserProfileRaceTypeEntity,
       UserProfileDistanceEntity,
+      TripRatingEntity,
     ]),
     JwtModule,
   ],

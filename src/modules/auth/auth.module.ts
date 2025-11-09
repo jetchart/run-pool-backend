@@ -7,6 +7,7 @@ import { UserEntity } from '../user/entities/user.entity';
 import { UserService } from '../user/services/user.service';
 import { AppLoggerModule } from '../app-logger/app-logger.module';
 import { AuthService } from './services/auth.service';
+import { TripRatingEntity } from '../trip/entities/trip-rating.entity';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { AuthService } from './services/auth.service';
       secret: process.env.JWT_SECRET || 'THE_SECRET',
       signOptions: { expiresIn: '7d' },
     }),
-    TypeOrmModule.forFeature([UserEntity]),
+  TypeOrmModule.forFeature([UserEntity, TripRatingEntity]),
     AppLoggerModule,
   ],
   controllers: [AuthController],
