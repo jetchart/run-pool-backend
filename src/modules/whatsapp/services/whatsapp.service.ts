@@ -6,6 +6,7 @@ import { Client, LocalAuth } from 'whatsapp-web.js';
 import { UserProfileEntity } from 'src/modules/user/entities/user-profile.entity';
 import { RaceEntity } from 'src/modules/race/entities/race.entity';
 import { TripEntity } from 'src/modules/trip/entities/trip.entity';
+import QRCode from "qrcode";
 
 
 @Injectable()
@@ -23,9 +24,10 @@ export class WhatsappService implements OnModuleInit {
                 args: ["--no-sandbox", "--disable-setuid-sandbox"],
             },
         });
-        this.client.on('qr', (qr) => {
+        this.client.on('qr', async (qr) => {
             console.clear();
             qrcode.generate(qr, { small: true });
+            await QRCode.toFile("whatsapp-qr.png", qr);
             console.log('Escaneá el QR para iniciar sesión en WhatsApp Web');
         });
         this.client.on('ready', () => {
