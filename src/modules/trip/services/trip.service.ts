@@ -151,14 +151,16 @@ export class TripService {
       await this.whatsappService.notifyTripConfirmed(
         driverProfile,
         tripPassenger.trip.race,
-        tripPassenger.trip
+        tripPassenger.trip,
+        `${process.env.WEB_HOST}/trips/${tripPassenger.trip.id}`
       );
     }
     if (status === TripPassengerStatus.REJECTED && passengerProfile && tripPassenger.trip.race && tripPassenger.trip) {
       await this.whatsappService.notifyTripRejected(
         passengerProfile,
         tripPassenger.trip.race,
-        tripPassenger.trip
+        tripPassenger.trip,
+        `${process.env.WEB_HOST}/races/${tripPassenger.trip.race.id}/trips`
       );
     }
 
@@ -428,7 +430,8 @@ export class TripService {
       await this.whatsappService.notifyTripJoin(
         driverProfile,
         trip.race,
-        passengerProfile
+        passengerProfile,
+        `${process.env.WEB_HOST}/trips/${trip.id}`
       );
     }
 
@@ -470,7 +473,8 @@ export class TripService {
       await this.whatsappService.notifyTripLeaved(
         driverProfile,
         tripPassenger.trip.race,
-        passengerProfile
+        passengerProfile,
+        `${process.env.WEB_HOST}/trips/${tripPassenger.trip.id}`
       );
     }
   }

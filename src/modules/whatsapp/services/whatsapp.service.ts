@@ -56,7 +56,7 @@ export class WhatsappService implements OnModuleInit {
         return results;
     }
 
-    async notifyTripCreated(driver: UserProfileEntity, race: RaceEntity, trip: TripEntity): Promise<{ success: boolean; info: string }[]> {
+    async notifyTripCreated(driver: UserProfileEntity, race: RaceEntity, trip: TripEntity, tripUrl: string): Promise<{ success: boolean; info: string }[]> {
         try {
             const driverPhone = driver.phoneCountryCode && driver.phoneNumber
                 ? `${driver.phoneCountryCode}${driver.phoneNumber}`
@@ -69,7 +69,8 @@ export class WhatsappService implements OnModuleInit {
                 {
                     name: driver.name,
                     raceName: race.name,
-                    tripDate: trip.departureDay.toDateString()
+                    tripDate: trip.departureDay.toDateString(),
+                    tripUrl: tripUrl
                 }
             );
             return await this.sendMessage([driverPhone], message);
@@ -79,7 +80,7 @@ export class WhatsappService implements OnModuleInit {
         }
     }
 
-    async notifyTripConfirmed(userProfile: UserProfileEntity, race: RaceEntity, trip: TripEntity): Promise<{ success: boolean; info: string }[]> {
+    async notifyTripConfirmed(userProfile: UserProfileEntity, race: RaceEntity, trip: TripEntity, tripUrl: string): Promise<{ success: boolean; info: string }[]> {
         try {
             const driverPhone = userProfile.phoneCountryCode && userProfile.phoneNumber
                 ? `${userProfile.phoneCountryCode}${userProfile.phoneNumber}`
@@ -93,6 +94,7 @@ export class WhatsappService implements OnModuleInit {
                     name: userProfile.name,
                     raceName: race.name,
                     tripDate: trip.departureDay.toDateString(),
+                    tripUrl: tripUrl,
                 }
             );
             return await this.sendMessage([driverPhone], message);
@@ -102,7 +104,7 @@ export class WhatsappService implements OnModuleInit {
         }
     }
 
-    async notifyTripJoin(driverProfile: UserProfileEntity, race: RaceEntity, passengerProfile: UserProfileEntity): Promise<{ success: boolean; info: string }[]> {
+    async notifyTripJoin(driverProfile: UserProfileEntity, race: RaceEntity, passengerProfile: UserProfileEntity, tripUrl: string): Promise<{ success: boolean; info: string }[]> {
         try {
             const driverPhone = driverProfile.phoneCountryCode && driverProfile.phoneNumber
                 ? `${driverProfile.phoneCountryCode}${driverProfile.phoneNumber}`
@@ -116,6 +118,7 @@ export class WhatsappService implements OnModuleInit {
                     name: driverProfile.name,
                     raceName: race.name,
                     passengerName: passengerProfile.name,
+                    tripUrl: tripUrl,
                 }
             );
             return await this.sendMessage([driverPhone], message);
@@ -125,7 +128,7 @@ export class WhatsappService implements OnModuleInit {
         }
     }
 
-    async notifyTripRejected(passengerProfile: UserProfileEntity, race: RaceEntity, trip: TripEntity): Promise<{ success: boolean; info: string }[]> {
+    async notifyTripRejected(passengerProfile: UserProfileEntity, race: RaceEntity, trip: TripEntity, raceUrl: string): Promise<{ success: boolean; info: string }[]> {
         try {
             const passengerPhone = passengerProfile.phoneCountryCode && passengerProfile.phoneNumber
                 ? `${passengerProfile.phoneCountryCode}${passengerProfile.phoneNumber}`
@@ -139,6 +142,7 @@ export class WhatsappService implements OnModuleInit {
                     name: passengerProfile.name,
                     raceName: race.name,
                     tripDate: trip.departureDay.toDateString(),
+                    racepUrl: raceUrl,
                 }
             );
             return await this.sendMessage([passengerPhone], message);
@@ -148,7 +152,7 @@ export class WhatsappService implements OnModuleInit {
         }
     }
 
-    async notifyTripLeaved(driverProfile: UserProfileEntity, race: RaceEntity, passengerProfile: UserProfileEntity): Promise<{ success: boolean; info: string }[]> {
+    async notifyTripLeaved(driverProfile: UserProfileEntity, race: RaceEntity, passengerProfile: UserProfileEntity, tripUrl: string): Promise<{ success: boolean; info: string }[]> {
         try {
             const driverPhone = driverProfile.phoneCountryCode && driverProfile.phoneNumber
                 ? `${driverProfile.phoneCountryCode}${driverProfile.phoneNumber}`
@@ -162,6 +166,7 @@ export class WhatsappService implements OnModuleInit {
                     name: driverProfile.name,
                     raceName: race.name,
                     passengerName: passengerProfile.name,
+                    tripUrl: tripUrl,
                 }
             );
             return await this.sendMessage([driverPhone], message);
