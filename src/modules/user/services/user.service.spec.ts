@@ -78,6 +78,10 @@ describe('UserService', () => {
             delete: jest.fn(),
           },
         },
+        {
+          provide: 'TripRatingEntityRepository',
+          useValue: {},
+        },
       ],
     }).compile();
 

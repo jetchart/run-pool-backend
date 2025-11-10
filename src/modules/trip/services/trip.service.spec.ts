@@ -1,3 +1,4 @@
+import { TemplateService } from '../../whatsapp/services/template.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, QueryRunner, Connection, IsNull } from 'typeorm';
@@ -14,6 +15,7 @@ import { mockTripEntity } from '../fixtures/mock-trip-entity';
 import { mockUserEntity } from '../../user/fixtures/mock-user-entity';
 import { mockRaceEntity } from '../../race/fixtures/mock-race-entity';
 import { mockTripPassengerEntity } from '../fixtures/mock-trip-passenger';
+import { NotifierService } from '../../mail/notifier.service';
 
 // Mock CarEntity
 const mockCarEntity = (): CarEntity => ({
@@ -94,6 +96,12 @@ describe('TripService', () => {
       providers: [
         TripService,
         {
+          provide: TemplateService,
+          useValue: {
+            renderTemplate: jest.fn(),
+          },
+        },
+        {
           provide: getRepositoryToken(TripEntity),
           useValue: {
             create: jest.fn(),
@@ -140,6 +148,20 @@ describe('TripService', () => {
           provide: getRepositoryToken(UserProfileEntity),
           useValue: {
             findOne: jest.fn(),
+          },
+        },
+        {
+          provide: 'TripRatingEntityRepository',
+          useValue: {},
+        },
+        {
+          provide: NotifierService,
+          useValue: {
+            notifyTripCreated: jest.fn(),
+            notifyTripConfirmed: jest.fn(),
+            notifyTripJoin: jest.fn(),
+            notifyTripRejected: jest.fn(),
+            notifyTripLeaved: jest.fn(),
           },
         },
       ],
@@ -221,6 +243,7 @@ describe('TripService', () => {
       expect(tripPassengerRepository.create).toHaveBeenCalledWith({
         trip: savedTrip,
         passenger: driver,
+        status: 'CONFIRMED',
       });
       expect(mockQueryRunner.manager.save).toHaveBeenCalledWith(TripPassengerEntity, driverAsPassenger);
       expect(mockQueryRunner.commitTransaction).toHaveBeenCalled();
@@ -509,7 +532,7 @@ describe('TripService', () => {
           passenger: { id: passengerId },
           deletedAt: IsNull(),
         },
-        relations: ['trip', 'trip.driver'],
+        relations: ['trip', 'trip.driver', 'passenger', 'trip.race'],
       });
       expect(tripPassengerRepository.update).toHaveBeenCalledWith(
         tripPassenger.id,

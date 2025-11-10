@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Inject } from '@nestjs/common';
 import { AppLogger } from '../app-logger/services/app-logger';
-import * as nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import { MailTemplate, MailTemplateConfig } from './mail-template.enum';
 import { UserProfileEntity } from '../user/entities/user-profile.entity';
 import { RaceEntity } from '../race/entities/race.entity';
@@ -9,26 +9,21 @@ import { TripEntity } from '../trip/entities/trip.entity';
 
 @Injectable()
 export class MailService {
-  private transporter: nodemailer.Transporter;
+  private resend: Resend;
   constructor(@Inject(AppLogger) private readonly appLogger: AppLogger) {
-    this.transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_PASS,
-      },
-    });
+    this.resend = new Resend(process.env.RESEND_API_KEY);
   }
 
   async sendMail(to: string, subject: string, text: string, html?: string) {
     try {
-      return await this.transporter.sendMail({
-        from: process.env.GMAIL_USER,
+      const from = process.env.RESEND_FROM_EMAIL || 'no-reply@runpool.com';
+      const response = await this.resend.emails.send({
+        from,
         to,
         subject,
-        text,
-        html,
+        html: html || text,
       });
+      return response;
     } catch (error) {
       this.appLogger.logError('MailService.sendMail', 'Error enviando mail', { to, subject }, error);
       return null;
