@@ -1,5 +1,5 @@
 import { TripPassengerStatus } from '../enums/trip-passenger-status.enum';
-import { WhatsappService } from '../../whatsapp/services/whatsapp.service';
+import { NotifierService } from '../../mail/notifier.service';
 import { TemplateService } from '../../whatsapp/services/template.service';
 import { WhatsappTemplate } from '../../whatsapp/templates/whatsapp-template.enum';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
@@ -32,7 +32,7 @@ export class TripService {
     private readonly carRepository: Repository<CarEntity>,
     @InjectRepository(UserProfileEntity)
     private readonly userProfileRepository: Repository<UserProfileEntity>,
-    private readonly whatsappService: WhatsappService,
+  private readonly notifierService: NotifierService,
     private readonly templateService: TemplateService,
   ) {}
 
@@ -114,17 +114,7 @@ export class TripService {
 
       await queryRunner.commitTransaction();
 
-      const driverPhone = `${userProfile.phoneCountryCode}${userProfile.phoneNumber}`;
-      if (driverPhone) {
-        const message = this.templateService.renderTemplate(
-          WhatsappTemplate.TRIP_CREATED,
-          {
-            name: userProfile.name,
-            raceName: race.name,
-          }
-        );
-        await this.whatsappService.sendMessage([driverPhone], message);
-      }
+      await this.notifierService.notifyTripCreated(userProfile, race, savedTrip, `${process.env.APP_DOMAIN}/trips/${savedTrip.id}`);
 
       // Retornar el viaje completo con pasajeros
       return this.findOneWithPassengers((savedTrip as TripEntity).id);
@@ -148,19 +138,19 @@ export class TripService {
     const passengerProfile = await this.userProfileRepository.findOne({ where: { user: { id: tripPassenger.passenger.id } } });
     const driverProfile = await this.userProfileRepository.findOne({ where: { user: { id: tripPassenger.trip.driver.id } } });
     if (status === TripPassengerStatus.CONFIRMED && driverProfile && tripPassenger.trip.race && tripPassenger.trip) {
-      await this.whatsappService.notifyTripConfirmed(
+      await this.notifierService.notifyTripConfirmed(
         driverProfile,
         tripPassenger.trip.race,
         tripPassenger.trip,
-        `${process.env.WEB_HOST}/trips/${tripPassenger.trip.id}`
+        `${process.env.APP_DOMAIN}/trips/${tripPassenger.trip.id}`
       );
     }
     if (status === TripPassengerStatus.REJECTED && passengerProfile && tripPassenger.trip.race && tripPassenger.trip) {
-      await this.whatsappService.notifyTripRejected(
+      await this.notifierService.notifyTripRejected(
         passengerProfile,
         tripPassenger.trip.race,
         tripPassenger.trip,
-        `${process.env.WEB_HOST}/races/${tripPassenger.trip.race.id}/trips`
+        `${process.env.APP_DOMAIN}/races/${tripPassenger.trip.race.id}/trips`
       );
     }
 
@@ -360,6 +350,7 @@ export class TripService {
     const trip = await this.tripRepository
       .createQueryBuilder('trip')
       .leftJoinAndSelect('trip.driver', 'driver')
+      .leftJoinAndSelect('trip.race', 'race')
       .leftJoinAndSelect('trip.car', 'car') // Sin restricción de deletedAt para car
       .leftJoinAndSelect('trip.passengers', 'passengers')
       .leftJoinAndSelect('passengers.passenger', 'passenger')
@@ -427,11 +418,11 @@ export class TripService {
       where: { user: { id: passengerId } },
     });
     if (driverProfile && passengerProfile) {
-      await this.whatsappService.notifyTripJoin(
+      await this.notifierService.notifyTripJoin(
         driverProfile,
         trip.race,
         passengerProfile,
-        `${process.env.WEB_HOST}/trips/${trip.id}`
+        `${process.env.APP_DOMAIN}/trips/${trip.id}`
       );
     }
 
@@ -470,11 +461,11 @@ export class TripService {
       where: { user: { id: passengerId } },
     });
     if (driverProfile && passengerProfile) {
-      await this.whatsappService.notifyTripLeaved(
+      await this.notifierService.notifyTripLeaved(
         driverProfile,
         tripPassenger.trip.race,
         passengerProfile,
-        `${process.env.WEB_HOST}/trips/${tripPassenger.trip.id}`
+        `${process.env.APP_DOMAIN}/trips/${tripPassenger.trip.id}`
       );
     }
   }
