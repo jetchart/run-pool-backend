@@ -28,12 +28,14 @@ export class WhatsappService implements OnModuleInit {
                 args: ["--no-sandbox", "--disable-setuid-sandbox"],
             },
         }); 
-        this.client.on('qr', async (qr) => {
+        const qrHandler = async (qr: string) => {
             console.clear();
             qrcode.generate(qr, { small: true });
             await QRCode.toFile("whatsapp-qr.png", qr);
             console.log('Escaneá el QR para iniciar sesión en WhatsApp Web');
-        });
+            this.client.removeListener('qr', qrHandler);
+        };
+        this.client.on('qr', qrHandler);
         this.client.on('ready', () => {
             this.ready = true;
             console.log('WhatsApp Web client is ready!');
