@@ -26,9 +26,19 @@ describe('MailService', () => {
   });
 
   it('should log error on sendMail failure', async () => {
-    service['transporter'] = { sendMail: jest.fn().mockRejectedValue(new Error('fail')) } as any;
+    service['resend'] = {
+      emails: {
+        send: jest.fn().mockImplementation(() => Promise.resolve({
+          data: null,
+          error: { message: 'API key is invalid', name: 'validation_error', statusCode: 401 },
+        }))
+      }
+    } as any;
     const result = await service.sendMail('to', 'subject', 'text');
-    expect(result).toBeNull();
+    expect(result).toEqual({
+      data: null,
+      error: expect.objectContaining({ message: 'API key is invalid' })
+    });
     expect(appLogger.logError).toHaveBeenCalled();
   });
 });

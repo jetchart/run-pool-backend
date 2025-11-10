@@ -11,18 +11,21 @@ import { TripEntity } from '../trip/entities/trip.entity';
 export class MailService {
   private resend: Resend;
   constructor(@Inject(AppLogger) private readonly appLogger: AppLogger) {
-    this.resend = new Resend(process.env.RESEND_API_KEY);
+    this.resend = new Resend(process.env.RESEND_API_KEY || 're_123');
   }
 
   async sendMail(to: string, subject: string, text: string, html?: string) {
     try {
-      const from = process.env.RESEND_FROM_EMAIL || 'no-reply@runpool.com';
+      const from = process.env.RESEND_FROM_EMAIL || 'no-reply@runpool.com.ar';
       const response = await this.resend.emails.send({
         from,
         to,
         subject,
         html: html || text,
       });
+      if (response?.error) {
+        this.appLogger.logError('MailService.sendMail', 'Error enviando mail', { to, subject }, response.error);
+      }
       return response;
     } catch (error) {
       this.appLogger.logError('MailService.sendMail', 'Error enviando mail', { to, subject }, error);
@@ -117,15 +120,6 @@ export class MailService {
       });
     } catch (error) {
       this.appLogger.logError('MailService.notifyTripLeaved', 'Error enviando mail de abandono', { driverProfile, race, passengerProfile, tripUrl }, error);
-      return null;
-    }
-  }
-
-  async sendWelcomeMail(userEmail: string, params: any) {
-    try {
-      return await this.sendTemplateMail(MailTemplate.WELCOME, userEmail, params);
-    } catch (error) {
-      this.appLogger.logError('MailService.sendWelcomeMail', 'Error enviando mail de bienvenida', { userEmail, params }, error);
       return null;
     }
   }

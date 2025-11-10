@@ -241,7 +241,7 @@ describe('UserProfileService', () => {
       mockDataSource.transaction.mockImplementation(async (cb) => cb(mockManager));
 
       await expect(service.createCompleteProfile(mockDto)).rejects.toThrow(
-        new BadRequestException('User with id 1 already has a profile'),
+        new BadRequestException('El usuario con id 1 ya tiene un perfil'),
       );
     });
 

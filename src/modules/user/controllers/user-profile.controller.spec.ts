@@ -137,11 +137,11 @@ describe('UserProfileController', () => {
 
     it('should throw BadRequestException when user already has a profile', async () => {
       mockUserProfileService.createCompleteProfile.mockRejectedValue(
-        new BadRequestException('User with id 1 already has a profile'),
+        new BadRequestException('El usuario con id 1 ya tiene un perfil'),
       );
 
       await expect(controller.createCompleteProfile(mockDto)).rejects.toThrow(
-        new BadRequestException('User with id 1 already has a profile'),
+        new BadRequestException('El usuario con id 1 ya tiene un perfil'),
       );
 
       expect(service.createCompleteProfile).toHaveBeenCalledWith(mockDto);

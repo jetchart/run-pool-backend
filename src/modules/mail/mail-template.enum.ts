@@ -1,5 +1,4 @@
 export enum MailTemplate {
-  WELCOME = 'WELCOME',
   TRIP_CREATED = 'TRIP_CREATED',
   TRIP_CONFIRMED = 'TRIP_CONFIRMED',
   TRIP_JOIN = 'TRIP_JOIN',
@@ -8,13 +7,6 @@ export enum MailTemplate {
 }
 
 export const MailTemplateConfig: Record<MailTemplate, { subject: string; html: (params: any) => string }> = {
-  [MailTemplate.WELCOME]: {
-    subject: '¡Bienvenido a RunPool! 🚗🎉',
-    html: ({ name }: { name: string }) => `
-      <h1>Hola ${name}! 👋</h1>
-      <p>Gracias por registrarte en RunPool 🚗✨<br>¡Te deseamos muchos viajes y aventuras! 🏁😎</p>
-    `,
-  },
   [MailTemplate.TRIP_CREATED]: {
     subject: 'Tu viaje fue creado 🚗📝',
     html: ({ name, raceName, tripDate, tripUrl }: any) => `

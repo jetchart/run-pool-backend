@@ -305,7 +305,7 @@ describe('TripService', () => {
 
       // Act & Assert
       await expect(service.create(createTripDto)).rejects.toThrow(BadRequestException);
-      await expect(service.create(createTripDto)).rejects.toThrow('Driver must have at least one car registered');
+      await expect(service.create(createTripDto)).rejects.toThrow('El conductor debe tener al menos un auto registrado');
     });
 
     it('should throw BadRequestException when driver has no active cars', async () => {
@@ -322,7 +322,7 @@ describe('TripService', () => {
 
       // Act & Assert
       await expect(service.create(createTripDto)).rejects.toThrow(BadRequestException);
-      await expect(service.create(createTripDto)).rejects.toThrow('Driver must have at least one active car');
+      await expect(service.create(createTripDto)).rejects.toThrow('El conductor debe tener al menos un auto activo');
     });
 
     it('should throw BadRequestException when departure date is in the past', async () => {

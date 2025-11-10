@@ -34,10 +34,4 @@ export class NotifierService {
     await this.whatsappService.notifyTripLeaved(driverProfile, race, passengerProfile, tripUrl);
     await this.mailService.notifyTripLeaved(driverProfile, race, passengerProfile, tripUrl);
   }
-
-  async sendWelcome(userProfile: any) {
-    if (userProfile.email) {
-      await this.mailService.sendWelcomeMail(userProfile.email, { name: userProfile.name });
-    }
-  }
 }
