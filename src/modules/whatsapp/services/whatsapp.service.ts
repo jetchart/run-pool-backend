@@ -21,7 +21,7 @@ export class WhatsappService implements OnModuleInit {
     ) {}
 
     async onModuleInit() {
-        this.client = new Client({
+        /*this.client = new Client({
             authStrategy: new LocalAuth(),
             puppeteer: { 
                 headless: true,
@@ -40,7 +40,7 @@ export class WhatsappService implements OnModuleInit {
             this.ready = true;
             console.log('WhatsApp Web client is ready!');
         });
-        this.client.initialize();
+        this.client.initialize();*/
     }
 
     async sendMessage(phones: string[], message: string): Promise<{ success: boolean; info: string }[]> {
