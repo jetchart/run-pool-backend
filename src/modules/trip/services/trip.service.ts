@@ -132,6 +132,7 @@ export class TripService {
       throw new NotFoundException('TripPassenger not found');
     }
     tripPassenger.status = status;
+    if (status === TripPassengerStatus.REJECTED) tripPassenger.deletedAt = new Date();
     await this.tripPassengerRepository.save(tripPassenger);
 
     // Notificación por WhatsApp según el nuevo estado
