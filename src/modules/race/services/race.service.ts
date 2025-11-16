@@ -45,7 +45,7 @@ export class RaceService {
       const raceDistanceEntities = raceDistances.map((rd) =>
         this.raceDistanceRepository.create({
           race: savedRace,
-          distance: rd.distanceId, // distance is stored as integer (enum)
+          distance: rd.distance,
         })
       );
       await this.raceDistanceRepository.save(raceDistanceEntities);
@@ -58,7 +58,7 @@ export class RaceService {
     }) as Promise<RaceEntity>;
   }
 
-  async update(id: number, data: Partial<CreateRaceDto> & { raceDistances?: { distanceId: number }[] }): Promise<RaceEntity> {
+  async update(id: number, data: Partial<CreateRaceDto> & { raceDistances?: { distance: number }[] }): Promise<RaceEntity> {
 
     const existing = await this.raceRepository.findOne({ where: { id } });
     if (!existing) {
@@ -89,7 +89,7 @@ export class RaceService {
         const rdEntities = raceDistances.map((rd: any) =>
           this.raceDistanceRepository.create({
             race: { id } as any,
-            distance: rd.distanceId,
+            distance: rd.distance,
           }),
         );
 

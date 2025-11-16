@@ -6,7 +6,6 @@ import {
   Column,
 } from 'typeorm';
 import { UserProfileEntity } from './user-profile.entity';
-import { Distance } from '../../race/enums/distance.enum';
 
 @Entity('user_profile_distance')
 export class UserProfileDistanceEntity {
@@ -20,8 +19,8 @@ export class UserProfileDistanceEntity {
   userProfile: UserProfileEntity;
 
   @Column({
-    type: 'enum',
-    enum: Distance,
+    name: 'distance',
+    type: 'int'
   })
-  distance: Distance;
+  distance: number;
 }

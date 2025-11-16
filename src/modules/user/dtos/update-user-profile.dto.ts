@@ -16,7 +16,6 @@ import { Gender } from '../enums/gender.enum';
 import { RunningExperience } from '../enums/running-experience.enum';
 import { UsuallyTravelRace } from '../enums/usually-travel-race.enum';
 import { RaceType } from '../../race/enums/race-type.enum';
-import { Distance } from '../../race/enums/distance.enum';
 
 export class UpdateUserProfileCarDto {
   @IsOptional()
@@ -77,8 +76,8 @@ export class UpdateUserProfileDistanceDto {
   @Min(1)
   id?: number;
 
-  @IsEnum(Distance)
-  distance: Distance;
+  @IsInt()
+  distance: number;
 }
 
 export class UpdateUserProfileDto {

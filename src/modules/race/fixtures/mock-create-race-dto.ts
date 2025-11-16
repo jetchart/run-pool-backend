@@ -13,5 +13,5 @@ export const mockCreateRaceDto: CreateRaceDto = {
   location: 'Test Location',
   website: 'https://testmarathon.com',
   raceType: RaceType.STREET,
-  raceDistances: [{ distanceId: 1 }],
+  raceDistances: [{ distance: 1 }],
 };

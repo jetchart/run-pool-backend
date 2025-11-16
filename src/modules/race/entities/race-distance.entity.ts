@@ -10,7 +10,6 @@ import {
   Column,
 } from 'typeorm';
 import { RaceEntity } from './race.entity';
-import { Distance } from '../enums/distance.enum';
 
 @Entity('race_distance')
 @Unique(['race', 'distance'])
@@ -23,7 +22,7 @@ export class RaceDistanceEntity {
   race: RaceEntity;
 
   @Column({ name: 'distance', type: 'int' })
-  distance: Distance;
+  distance: number;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
