@@ -140,7 +140,7 @@ export class TripService {
     const driverProfile = await this.userProfileRepository.findOne({ where: { user: { id: tripPassenger.trip.driver.id } } });
     if (status === TripPassengerStatus.CONFIRMED && driverProfile && tripPassenger.trip.race && tripPassenger.trip) {
       await this.notifierService.notifyTripConfirmed(
-        driverProfile,
+        passengerProfile,
         tripPassenger.trip.race,
         tripPassenger.trip,
         `${process.env.APP_DOMAIN}/trips/${tripPassenger.trip.id}`
