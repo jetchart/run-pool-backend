@@ -6,7 +6,6 @@ export const mockCreateRaceDto: CreateRaceDto = {
   description: 'A test marathon for testing purposes',
   startDate: '2024-06-15',
   endDate: '2024-06-15',
-  imageUrl: 'https://example.com/marathon.jpg',
   city: 'Test City',
   province: 'Test Province',
   country: 'Test Country',

@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { RaceEntity } from '../entities/race.entity';
 import { RaceDistanceEntity } from '../entities/race-distance.entity';
 import { CreateRaceDto } from '../dtos/create-race.dto';
+import { Express } from 'express';
 import { validateOrReject } from 'class-validator';
 
 @Injectable()
@@ -35,9 +36,15 @@ export class RaceService {
     return race;
   }
 
-  async create(data: CreateRaceDto): Promise<RaceEntity> {
-    await validateOrReject(data);
+  async create(data: CreateRaceDto, files?: any[]): Promise<RaceEntity> {
     const { raceDistances, ...raceData } = data;
+
+    if (files && files.length > 0) {
+      if (files[0]) raceData.image = files[0].buffer;
+      if (files[1]) raceData.imageThumbnail = files[1].buffer;
+    }
+
+
     const race = this.raceRepository.create(raceData);
     const savedRace = await this.raceRepository.save(race);
 
@@ -58,7 +65,7 @@ export class RaceService {
     }) as Promise<RaceEntity>;
   }
 
-  async update(id: number, data: Partial<CreateRaceDto> & { raceDistances?: { distance: number }[] }): Promise<RaceEntity> {
+  async update(id: number, data: Partial<CreateRaceDto> & { raceDistances?: { distance: number }[] }, files?: any[]): Promise<RaceEntity> {
 
     const existing = await this.raceRepository.findOne({ where: { id } });
     if (!existing) {
@@ -67,6 +74,12 @@ export class RaceService {
 
     // Separar raceDistances del resto
     const { raceDistances, ...raceData } = data as any;
+
+    // Si hay archivos, actualiza las imágenes
+    if (files && files.length > 0) {
+      if (files[0]) raceData.image = files[0].buffer;
+      if (files[1]) raceData.imageThumbnail = files[1].buffer;
+    }
 
     // Usar QueryRunner para operación atómica si se actualizarán distancias
     if (raceDistances && Array.isArray(raceDistances)) {

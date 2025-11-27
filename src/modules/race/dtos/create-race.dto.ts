@@ -13,9 +13,9 @@ import { CreateRaceDistanceDto } from './create-race-distance.dto';
 import { RaceType } from '../enums/race-type.enum';
 
 export class CreateRaceDto {
-  @IsString()
-  @IsNotEmpty()
-  imageUrl: string;
+  image?: Buffer;
+
+  imageThumbnail?: Buffer;
 
   @IsString()
   @IsNotEmpty()

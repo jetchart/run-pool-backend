@@ -18,7 +18,6 @@ export class TripResponse {
     startDate: Date;
     endDate: Date;
     location: string;
-    imageUrl: string;
   };
   car: {
     id: number;

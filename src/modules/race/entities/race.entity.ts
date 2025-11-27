@@ -28,8 +28,11 @@ export class RaceEntity {
   @Column({ name: 'end_date', type: 'date' })
   endDate: string;
 
-  @Column({ name: 'image_url', type: 'varchar', length: 200 })
-  imageUrl: string;
+  @Column({ name: 'image', type: 'bytea', nullable: true })
+  image: Buffer;
+
+  @Column({ name: 'image_thumbnail', type: 'bytea', nullable: true })
+  imageThumbnail: Buffer;
 
   @Column({ length: 50 })
   city: string;

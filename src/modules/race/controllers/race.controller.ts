@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Post, Param, ParseIntPipe, UsePipes, ValidationPipe, Put, Delete } from '@nestjs/common';
+import { Body, Controller, Get, Post, Param, ParseIntPipe, UsePipes, ValidationPipe, Put, Delete, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { RaceService } from '../services/race.service';
 import { CreateRaceDto } from '../dtos/create-race.dto';
 import { RaceEntity } from '../entities/race.entity';
@@ -24,17 +25,25 @@ export class RaceController {
   }
 
   @Post()
-  async create(@Body() createRaceDto: CreateRaceDto): Promise<RaceEntity> {
-    return this.raceService.create(createRaceDto);
+  @UseInterceptors(FilesInterceptor('files', 2))
+  async create(
+    @Body() createRaceDto: any,
+    @UploadedFiles() files: any[],
+  ): Promise<RaceEntity> {
+    // files[0] = image, files[1] = imageThumbnail
+    return this.raceService.create({ ...createRaceDto, raceDistances: JSON.parse(createRaceDto.raceDistances) }, files);
   }
 
   @Put(':id')
+  @UseInterceptors(FilesInterceptor('files', 2))
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: false }))
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateRaceDto: UpdateRaceDto,
+    @Body() updateRaceDto: any,
+    @UploadedFiles() files: any[],
   ): Promise<RaceEntity> {
-    return this.raceService.update(id, updateRaceDto);
+    // files[0] = image, files[1] = imageThumbnail
+    return this.raceService.update(id, { ...updateRaceDto, raceDistances: JSON.parse(updateRaceDto.raceDistances) }, files);
   }
 
   @Delete(':id')

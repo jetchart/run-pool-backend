@@ -15,10 +15,6 @@ import { RaceType } from "../enums/race-type.enum";
 export class UpdateRaceDto {
   @IsOptional()
   @IsString()
-  imageUrl?: string;
-
-  @IsOptional()
-  @IsString()
   name?: string;
 
   @IsOptional()

@@ -524,7 +524,6 @@ export class TripService {
         startDate: new Date(trip.race.startDate),
         endDate: new Date(trip.race.endDate),
         location: trip.race.location,
-        imageUrl: trip.race.imageUrl,
       },
       car: {
         id: trip.car.id,

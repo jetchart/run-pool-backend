@@ -8,7 +8,6 @@ export const mockRaceEntity = (overrides?: Partial<RaceEntity>): RaceEntity => {
   race.description = 'Carrera de 10K en La Plata';
   race.startDate = '2026-12-25';
   race.endDate = '2026-12-25';
-  race.imageUrl = 'https://example.com/race.jpg';
   race.city = 'La Plata';
   race.province = 'Buenos Aires';
   race.country = 'Argentina';
