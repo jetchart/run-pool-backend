@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Param, ParseIntPipe, UsePipes, ValidationPipe, Put, Delete, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Post, Param, ParseIntPipe, UsePipes, ValidationPipe, Put, Delete, UploadedFiles, UseInterceptors, BadRequestException } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { RaceService } from '../services/race.service';
 import { CreateRaceDto } from '../dtos/create-race.dto';
@@ -30,6 +30,7 @@ export class RaceController {
     @Body() createRaceDto: any,
     @UploadedFiles() files: any[],
   ): Promise<RaceEntity> {
+    if (!files || files.length != 2) throw new BadRequestException('Enviar image principal y la image thumbnail');
     // files[0] = image, files[1] = imageThumbnail
     return this.raceService.create({ ...createRaceDto, raceDistances: JSON.parse(createRaceDto.raceDistances) }, files);
   }
