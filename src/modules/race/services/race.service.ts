@@ -14,7 +14,7 @@ export class RaceService {
       const [data, total] = await this.raceRepository.createQueryBuilder('race')
         .leftJoinAndSelect('race.distances', 'distances')
         .leftJoinAndSelect('race.trips', 'trips')
-        .orderBy('race.startDate', 'ASC')
+        .orderBy('race.startDate', 'DESC')
         .skip(skip)
         .take(limit)
         .getManyAndCount();
