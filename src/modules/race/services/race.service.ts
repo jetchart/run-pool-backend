@@ -9,6 +9,17 @@ import { validateOrReject } from 'class-validator';
 
 @Injectable()
 export class RaceService {
+    async findAllPaginated(page: number = 1, limit: number = 10): Promise<{ data: RaceEntity[]; total: number; page: number; limit: number }> {
+      const skip = (page - 1) * limit;
+      const [data, total] = await this.raceRepository.createQueryBuilder('race')
+        .leftJoinAndSelect('race.distances', 'distances')
+        .leftJoinAndSelect('race.trips', 'trips')
+        .orderBy('race.startDate', 'ASC')
+        .skip(skip)
+        .take(limit)
+        .getManyAndCount();
+      return { data, total, page, limit };
+    }
   constructor(
     @InjectRepository(RaceEntity)
     private readonly raceRepository: Repository<RaceEntity>,
@@ -17,10 +28,11 @@ export class RaceService {
   ) {}
 
   async findAll(): Promise<RaceEntity[]> {
-    return this.raceRepository.find({
-      relations: ['distances'],
-      order: { startDate: 'ASC' },
-    });
+        return this.raceRepository.createQueryBuilder('race')
+      .leftJoinAndSelect('race.distances', 'distances')
+      .leftJoinAndSelect('race.trips', 'trips')
+      .orderBy('race.startDate', 'ASC')
+      .getMany();
   }
 
   async findOne(id: number): Promise<RaceEntity> {

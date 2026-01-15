@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Post, Param, ParseIntPipe, UsePipes, ValidationPipe, Put, Delete, UploadedFiles, UseInterceptors, BadRequestException } from '@nestjs/common';
+import { Query } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { RaceService } from '../services/race.service';
 import { CreateRaceDto } from '../dtos/create-race.dto';
@@ -10,8 +11,13 @@ export class RaceController {
   constructor(private readonly raceService: RaceService) {}
 
   @Get()
-  async findAll(): Promise<RaceEntity[]> {
-    return this.raceService.findAll();
+  async findAll(
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '9'
+  ): Promise<{ data: RaceEntity[]; total: number; page: number; limit: number }> {
+    const pageNum = parseInt(page, 9) || 1;
+    const limitNum = parseInt(limit, 9) || 9;
+    return this.raceService.findAllPaginated(pageNum, limitNum);
   }
 
   @Get('past-or-today')
